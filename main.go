@@ -9,9 +9,11 @@ import (
 )
 
 func main() {
-	tabs := []string{"Lip Gloss", "Blush", "Eye Shadow", "Mascara", "Foundation"}
-	tabContent := []string{"Lip Gloss Tab", "Blush Tab", "Eye Shadow Tab", "Mascara Tab", "Foundation Tab"}
-	m := login.NewModelTabs(tabs, tabContent)
+	m, err := login.NewSampleConfigUI()
+	if err != nil {
+		fmt.Printf("could not start program: %s\n", err)
+		os.Exit(1)
+	}
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)

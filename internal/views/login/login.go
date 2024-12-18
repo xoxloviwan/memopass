@@ -20,20 +20,28 @@ var (
 	noStyle             = lipgloss.NewStyle()
 	helpStyle           = blurredStyle
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-
-	focusedButton = focusedStyle.Render("[ Войти ]")
-	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Войти"))
 )
 
-type modelLogin struct {
-	focusIndex int
-	inputs     []textinput.Model
-	cursorMode cursor.Mode
+type button struct {
+	title   string
+	focused bool
 }
 
-func InitLogin() modelLogin {
-	m := modelLogin{
+type modelForm struct {
+	name         string
+	focusIndex   int
+	inputs       []textinput.Model
+	cursorMode   cursor.Mode
+	submitButton button
+}
+
+func InitLogin() modelForm {
+	m := modelForm{
+		name:   "Вход",
 		inputs: make([]textinput.Model, 2),
+		submitButton: button{
+			title: "Войти",
+		},
 	}
 
 	var t textinput.Model
@@ -60,11 +68,47 @@ func InitLogin() modelLogin {
 	return m
 }
 
-func (m modelLogin) Init() tea.Cmd {
+func InitSignUp() modelForm {
+	m := modelForm{
+		name:   "Регистрация",
+		inputs: make([]textinput.Model, 3),
+		submitButton: button{
+			title: "Зарегистрироваться",
+		},
+	}
+	var t textinput.Model
+	for i := range m.inputs {
+		t = textinput.New()
+		t.Cursor.Style = cursorStyle
+		t.CharLimit = 32
+
+		switch i {
+		case 0:
+			t.Placeholder = "Придумайте логин"
+			t.Focus()
+			t.PromptStyle = focusedStyle
+			t.TextStyle = focusedStyle
+		case 1:
+			t.Placeholder = "Введите пароль"
+			t.EchoMode = textinput.EchoPassword
+			t.EchoCharacter = '•'
+		case 2:
+			t.Placeholder = "Повторите пароль"
+			t.EchoMode = textinput.EchoPassword
+			t.EchoCharacter = '•'
+		}
+
+		m.inputs[i] = t
+	}
+
+	return m
+}
+
+func (m modelForm) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m modelLogin) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -131,7 +175,7 @@ func (m modelLogin) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *modelLogin) updateInputs(msg tea.Msg) tea.Cmd {
+func (m *modelForm) updateInputs(msg tea.Msg) tea.Cmd {
 	cmds := make([]tea.Cmd, len(m.inputs))
 
 	// Only text inputs with Focus() set will respond, so it's safe to simply
@@ -143,7 +187,7 @@ func (m *modelLogin) updateInputs(msg tea.Msg) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (m modelLogin) View() string {
+func (m modelForm) View() string {
 	var b strings.Builder
 
 	for i := range m.inputs {
@@ -153,11 +197,13 @@ func (m modelLogin) View() string {
 		}
 	}
 
-	button := &blurredButton
-	if m.focusIndex == len(m.inputs) {
-		button = &focusedButton
+	button := fmt.Sprintf("[ %s ]", blurredStyle.Render(m.submitButton.title))
+	m.submitButton.focused = m.focusIndex == len(m.inputs)
+	if m.submitButton.focused {
+		button = focusedStyle.Render(fmt.Sprintf("[ %s ]", m.submitButton.title))
 	}
-	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
+
+	fmt.Fprintf(&b, "\n\n%s\n\n", button)
 
 	b.WriteString(helpStyle.Render("cursor mode is "))
 	b.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
