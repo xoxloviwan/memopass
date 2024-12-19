@@ -4,12 +4,18 @@ version: '3'
 
 vars:
   VERSION: v1.0.0
-  LDFLAGS: "-X main.buildVersion={{.VERSION}} -X main.buildDate={{ now | date \"2006-01-02\" }} -X main.buildCommit=$COMMIT"
+  COMMIT: 
+    sh: git rev-parse --short HEAD
+  LDFLAGS: "-X main.buildVersion={{.VERSION}} -X main.buildDate={{ now | date \"2006-01-02\" }} -X main.buildCommit={{.COMMIT}}"
 
 tasks:
-  build:
+  build_cli:
+    desc: Build gophkeeper cli
     cmds:
-      - |
-        export COMMIT=$(git rev-parse --short HEAD)
-        go build -ldflags "{{.LDFLAGS}}" ./cmd/gophkeeper/.
+      - go build -ldflags "{{.LDFLAGS}}" ./cmd/gophkeeper/.
     silent: true
+  build:
+    desc: Build all
+    cmds:
+      - task: build_cli
+
