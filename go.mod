@@ -6,6 +6,9 @@ require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/charmbracelet/lipgloss v1.0.0
+	github.com/felixge/httpsnoop v1.0.4
+	github.com/go-pkgz/routegroup v1.2.0
+	github.com/google/uuid v1.6.0
 )
 
 require (

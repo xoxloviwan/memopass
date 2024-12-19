@@ -13,9 +13,31 @@ tasks:
     desc: Build gophkeeper cli
     cmds:
       - go build -ldflags "{{.LDFLAGS}}" ./cmd/gophkeeper/.
-    silent: true
+#    silent: true
+  
+  build_server:
+    desc: Build gophkeeper server
+    cmds:
+      - go build -ldflags "{{.LDFLAGS}}" ./cmd/server/.
+
   build:
     desc: Build all
     cmds:
       - task: build_cli
+      - task: build_server
 
+  install_mkcert:
+    desc: Install mkcert
+    cmds:
+    - |
+      if ! command -v mkcert &> /dev/null; then
+        echo "Installing mkcert..."
+        powershell -Command "Start-Process PowerShell -Verb RunAs -ArgumentList 'choco','install','mkcert'"
+        mkcert -install
+      else
+        echo "mkcert is already installed."
+      fi
+  make_cert:
+    desc: Make cert for dev
+    cmds:
+      - mkdir certs; cd certs; mkcert localhost 127.0.0.1
