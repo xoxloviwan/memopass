@@ -9,45 +9,30 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Describes the styles for the plugins page
-// Could be re-used by other pages in the future to keep a consisten look
+func tabBorderWithBottom(left, middle, right string) lipgloss.Border {
+	border := lipgloss.RoundedBorder()
+	border.BottomLeft = left
+	border.Bottom = middle
+	border.BottomRight = right
+	return border
+}
+
+// Describes the styles for the auth page
 var (
-	activeTabBorder = lipgloss.Border{
-		Top:         "─",
-		Bottom:      " ",
-		Left:        "│",
-		Right:       "│",
-		TopLeft:     "╭",
-		TopRight:    "╮",
-		BottomLeft:  "┘",
-		BottomRight: "└",
-	}
-	highlight = lipgloss.AdaptiveColor{Light: "#13002D", Dark: "#22ADF6"}
-	tabBorder = lipgloss.Border{
-		Top:         "─",
-		Bottom:      "─",
-		Left:        "│",
-		Right:       "│",
-		TopLeft:     "╭",
-		TopRight:    "╮",
-		BottomLeft:  "┴",
-		BottomRight: "┴",
-	}
-	tab = lipgloss.NewStyle().
-		Border(tabBorder, true).
-		BorderForeground(highlight).
-		Padding(0, 1)
-	activeTab = tab.Border(activeTabBorder, true)
+	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")
+	highlightColor    = lipgloss.AdaptiveColor{Light: "#13002D", Dark: "#22ADF6"}
+	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
 
-	tabGap = tab.
-		BorderTop(false).
-		BorderLeft(false).
-		BorderRight(false)
+	docStyle = lipgloss.NewStyle().Padding(1, 2, 1, 2)
 
-	docStyle = lipgloss.NewStyle().Padding(1, 2, 0, 2)
-
-	special = lipgloss.AdaptiveColor{Light: "#43BF6D", Dark: "#73F59F"}
-	checked = lipgloss.NewStyle().SetString("✓").Foreground(special).PaddingRight(1).String()
+	inactiveTabStyle = lipgloss.NewStyle().Border(inactiveTabBorder, true).BorderForeground(highlightColor).Padding(0, 3)
+	activeTabStyle   = inactiveTabStyle.Border(activeTabBorder, true).Bold(true)
+	magicOffset      = 2
+	windowStyle      = lipgloss.NewStyle().
+				BorderForeground(highlightColor).
+				Padding(1, magicOffset).
+				Align(lipgloss.Left).
+				Border(lipgloss.NormalBorder()).UnsetBorderTop()
 )
 
 type Tab struct {
@@ -112,45 +97,58 @@ func (ap *AuthPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // renderTabs will create the view for the tabs
-// counting the new lines can help determine the height for other components
-func (ap *AuthPage) renderTabs(width int) string {
+func (ap *AuthPage) renderTabs() string {
 	var renderedTabs []string
 
 	// Sort the keys to make sure tabs are in the same order everytime
-	// Using a map helps with organizing selected plugins with plugin type
 	keys := make([]int, 0, len(ap.Tabs))
 	for k := range ap.Tabs {
 		keys = append(keys, k)
 	}
 	sort.Ints(keys)
-	for _, k := range keys {
-		if k == ap.activatedTab {
-			renderedTabs = append(renderedTabs, activeTab.Render(ap.Tabs[k].Name))
+	for i, k := range keys {
+		var style lipgloss.Style
+		isFirst, isLast, isActive := i == 0, i == len(keys)-1, k == ap.activatedTab
+		if isActive {
+			style = activeTabStyle
 		} else {
-			renderedTabs = append(renderedTabs, tab.Render(ap.Tabs[k].Name))
+			style = inactiveTabStyle
 		}
+		border, _, _, _, _ := style.GetBorder()
+		if isFirst && isActive {
+			border.BottomLeft = "│"
+		} else if isFirst && !isActive {
+			border.BottomLeft = "├"
+		} else if isLast && isActive {
+			border.BottomRight = "│"
+		} else if isLast && !isActive {
+			border.BottomRight = "┤"
+		}
+		style = style.Border(border)
+		renderedTabs = append(renderedTabs, style.Render(ap.Tabs[k].Name))
 	}
 
 	row := lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderedTabs...,
 	)
-	gap := tabGap.Render(strings.Repeat(" ", max(0, width-lipgloss.Width(row)-2)))
-	return lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap) + "\n\n"
+	return row
 }
 
 func (ap AuthPage) View() string {
 	doc := strings.Builder{}
 
 	// Tabs
-	row := ap.renderTabs(ap.width)
+	row := ap.renderTabs()
 	_, err := doc.WriteString(row)
 	if err != nil {
 		return err.Error()
 	}
+	doc.WriteString("\n")
 
+	windowWidth := lipgloss.Width(row) - windowStyle.GetHorizontalPadding() + magicOffset
 	// Content
-	_, err = doc.WriteString(ap.TabContent[ap.activatedTab].View())
+	_, err = doc.WriteString(windowStyle.Width(windowWidth).Render(ap.TabContent[ap.activatedTab].View()))
 	if err != nil {
 		return err.Error()
 	}
