@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"iwakho/gopherkeep/internal/views/login"
+	"iwakho/gopherkeep/internal/cli/views"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	m, err := login.NewSampleConfigUI()
+	m, err := views.NewSampleConfigUI()
 	if err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(1)

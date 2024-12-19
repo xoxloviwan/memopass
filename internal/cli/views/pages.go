@@ -1,6 +1,10 @@
-package login
+package views
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	"iwakho/gopherkeep/internal/cli/views/login"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
 
 const (
 	FirstPage = iota
@@ -27,7 +31,7 @@ type SampleConfigUI struct {
 
 func NewSampleConfigUI() (SampleConfigUI, error) {
 	// w := NewWelcomePage()
-	p, err := NewAuthPage()
+	p, err := login.NewAuthPage()
 	if err != nil {
 		return SampleConfigUI{}, err
 	}
