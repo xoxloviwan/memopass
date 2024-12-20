@@ -4,8 +4,8 @@ import (
 	iHttp "iwakho/gopherkeep/internal/srv/http"
 	"iwakho/gopherkeep/internal/srv/http/handlers"
 	iLog "iwakho/gopherkeep/internal/srv/log"
-	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -22,5 +22,8 @@ func main() {
 	}
 	logger.Info("Starting server", "addr", srv.Addr)
 	err := srv.ListenAndServeTLS("./certs/localhost+1.pem", "./certs/localhost+1-key.pem")
-	log.Fatal(err)
+	if err != nil {
+		logger.Error("Server error", "error", err)
+		os.Exit(1)
+	}
 }

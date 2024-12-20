@@ -20,9 +20,9 @@ func Logging(logger logger) middleware {
 			reqID := uuid.New().String()
 			logger.Info(
 				"REQ",
-				slog.String("request_id", reqID),
 				slog.String("method", r.Method),
 				slog.String("uri", r.URL.String()),
+				slog.String("request_id", reqID),
 				slog.String("ip", r.RemoteAddr),
 				slog.String("user_agent", r.Header.Get("User-Agent")),
 			)
@@ -31,10 +31,10 @@ func Logging(logger logger) middleware {
 			m := httpsnoop.CaptureMetrics(next, w, r)
 			logger.Info(
 				"RES",
-				slog.String("request_id", reqID),
 				slog.Int("status", m.Code),
 				slog.Duration("duration", m.Duration),
 				slog.Int64("size", m.Written),
+				slog.String("request_id", reqID),
 			)
 		})
 	}

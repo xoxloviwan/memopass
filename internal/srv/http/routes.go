@@ -27,13 +27,13 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 	router.Use(middleware.Logging(rr.logger))
 
 	// create a new group for the /api/user path
-	apiRouter := router.Mount("/api/user")
-	apiRouter.HandleFunc("POST /signup", h.SignUp)
-	apiRouter.HandleFunc("POST /login", h.Auth)
+	apiRouter := router.Mount("/api/v1")
+	userLayer := apiRouter.Mount("/user")
+	userLayer.HandleFunc("POST /signup", h.SignUp)
+	userLayer.HandleFunc("GET /login", h.Login)
 
-	protectedGroup := router.Mount("/api/v1")
-	protectedGroup.Use(middleware.CheckAuth)
-	protectedGroup.HandleFunc("GET /protected", func(w http.ResponseWriter, r *http.Request) {
+	apiRouter.Use(middleware.CheckAuthOrDirectTo("/api/v1/user/login"))
+	apiRouter.HandleFunc("GET /protected", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
