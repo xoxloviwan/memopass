@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	addr := ":4443"
+	addr := ":443"
 	logger := iLog.New()
 
 	router := iHttp.NewRouter(http.NewServeMux(), logger)
