@@ -32,7 +32,7 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 	userLayer.HandleFunc("POST /signup", h.SignUp)
 	userLayer.HandleFunc("GET /login", h.Login)
 
-	apiRouter.Use(middleware.CheckAuthOrDirectTo("/api/v1/user/login"))
+	apiRouter.Use(middleware.CheckAuth)
 	apiRouter.HandleFunc("GET /protected", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})

@@ -26,6 +26,15 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Authorization", jwt.Bearer+tkn)
+	cookie := &http.Cookie{
+		Name:     "tkn",
+		Value:    tkn,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+	http.SetCookie(w, cookie)
 	w.WriteHeader(http.StatusOK)
 }
 
