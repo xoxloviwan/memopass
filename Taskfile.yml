@@ -41,3 +41,33 @@ tasks:
     desc: Make cert for dev
     cmds:
       - mkdir certs; cd certs; mkcert localhost 127.0.0.1
+
+  install_sqlite:
+    desc: Install sqlite3
+    cmds:
+    - |
+      if ! command -v sqlite3 &> /dev/null; then
+        echo "Installing sqlite3..."
+        winget install SQLite.SQLite
+      else
+        echo "sqlite3 is already installed."
+      fi
+  
+  install_migrate:
+    desc: Install migrate
+    cmds:
+    - |
+      if ! command -v migrate &> /dev/null; then
+        echo "Installing migrate..."
+        export CGO_ENABLED=1
+        go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      else
+        echo "migrate is already installed."
+      fi
+  
+  run_migrations:
+    vars:
+      dbpath: ./db/memopass.db
+    cmds:
+      - migrate -database sqlite3://{{.dbpath}}?query -path db/migrations up
+      
