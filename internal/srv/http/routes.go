@@ -28,7 +28,6 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 	router := routegroup.New(rr.mux)
 	router.Use(middleware.Logging(rr.logger))
 
-	// create a new group for the /api/user path
 	apiRouter := router.Mount("/api/v1")
 	userLayer := apiRouter.Mount("/user")
 	userLayer.HandleFunc("POST /signup", h.SignUp)
@@ -40,6 +39,7 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 		w.Write([]byte(fmt.Sprintln(userID)))
 		w.WriteHeader(http.StatusOK)
 	})
+	apiRouter.HandleFunc("POST /item/add", h.AddItem)
 
 	return router
 }
