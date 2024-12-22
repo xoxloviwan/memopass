@@ -73,7 +73,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func addAuthData(user model.User, w http.ResponseWriter) error {
-	tkn, err := jwt.BuildJWT(user.Name)
+	tkn, err := jwt.BuildJWT(user.Name, user.ID)
 	if err != nil {
 		return err
 	}

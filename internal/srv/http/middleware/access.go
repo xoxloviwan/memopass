@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"iwakho/gopherkeep/internal/srv/jwt"
+	"iwakho/gopherkeep/internal/srv/model"
 	"net/http"
 	"strings"
 )
-
-type userCtxKey struct{}
 
 var errorAuthHeader = fmt.Sprintf(`%s realm="restricted", error="invalid_token"`, jwt.Bearer)
 
@@ -25,7 +24,7 @@ func CheckAuth(next http.Handler) http.Handler {
 			auth = strings.Replace(auth, jwt.Bearer, "", 1)
 			user, err := jwt.GetUser(auth)
 			if err == nil {
-				ctx := context.WithValue(r.Context(), userCtxKey{}, *user)
+				ctx := context.WithValue(r.Context(), model.UserIDCtxKey{}, *user)
 				r = r.WithContext(ctx)
 				next.ServeHTTP(w, r)
 				return

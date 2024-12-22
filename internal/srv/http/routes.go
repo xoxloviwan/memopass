@@ -1,9 +1,11 @@
 package http
 
 import (
+	"fmt"
 	"iwakho/gopherkeep/internal/srv/http/handlers"
 	"iwakho/gopherkeep/internal/srv/http/middleware"
 	"iwakho/gopherkeep/internal/srv/log"
+	"iwakho/gopherkeep/internal/srv/model"
 	"net/http"
 
 	"github.com/go-pkgz/routegroup"
@@ -34,6 +36,8 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 
 	apiRouter.Use(middleware.CheckAuth)
 	apiRouter.HandleFunc("GET /protected", func(w http.ResponseWriter, r *http.Request) {
+		userID := r.Context().Value(model.UserIDCtxKey{}).(int)
+		w.Write([]byte(fmt.Sprintln(userID)))
 		w.WriteHeader(http.StatusOK)
 	})
 

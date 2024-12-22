@@ -10,3 +10,5 @@ type User struct {
 	Name string
 	Hash []byte
 }
+
+type UserIDCtxKey struct{}
