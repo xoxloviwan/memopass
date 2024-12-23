@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strings"
 
+	ctrls "iwakho/gopherkeep/internal/cli/controls"
+
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -20,6 +22,7 @@ var (
 	noStyle             = lipgloss.NewStyle()
 	helpStyle           = blurredStyle
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
+	errorStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("#f00"))
 )
 
 type button struct {
@@ -27,21 +30,28 @@ type button struct {
 	focused bool
 }
 
+type Callback func()
+
 type modelForm struct {
 	name         string
 	focusIndex   int
 	inputs       []textinput.Model
 	cursorMode   cursor.Mode
 	submitButton button
+	failMessage  string
+	isLogin      bool
+	onEnter      Callback
 }
 
-func InitLogin() modelForm {
+func InitLogin(onEnter Callback) modelForm {
 	m := modelForm{
 		name:   "Вход",
 		inputs: make([]textinput.Model, 2),
 		submitButton: button{
 			title: "Войти",
 		},
+		isLogin: true,
+		onEnter: onEnter,
 	}
 
 	var t textinput.Model
@@ -115,18 +125,6 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "esc":
 			return m, tea.Quit
 
-		// Change cursor mode
-		case "ctrl+r":
-			m.cursorMode++
-			if m.cursorMode > cursor.CursorHide {
-				m.cursorMode = cursor.CursorBlink
-			}
-			cmds := make([]tea.Cmd, len(m.inputs))
-			for i := range m.inputs {
-				cmds[i] = m.inputs[i].Cursor.SetMode(m.cursorMode)
-			}
-			return m, tea.Batch(cmds...)
-
 		// Set focus to next input
 		case "tab", "shift+tab", "enter", "up", "down":
 			s := msg.String()
@@ -134,6 +132,16 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
+				if m.isLogin {
+					login := m.inputs[0].Value()
+					password := m.inputs[1].Value()
+					if err := ctrls.TryLogin(login, password); err != nil {
+						m.failMessage = err.Error()
+						return m, nil
+					}
+					m.onEnter()
+					return m, nil
+				}
 				return m, tea.Quit
 			}
 
@@ -176,6 +184,7 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *modelForm) updateInputs(msg tea.Msg) tea.Cmd {
+	m.failMessage = ""
 	cmds := make([]tea.Cmd, len(m.inputs))
 
 	// Only text inputs with Focus() set will respond, so it's safe to simply
@@ -203,11 +212,11 @@ func (m modelForm) View() string {
 		button = focusedStyle.Render(fmt.Sprintf("[ %s ]", m.submitButton.title))
 	}
 
-	fmt.Fprintf(&b, "\n\n%s\n\n", button)
+	fmt.Fprintf(&b, "\n\n%s\n", button)
 
-	b.WriteString(helpStyle.Render("cursor mode is "))
-	b.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
-	b.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
-
+	if m.failMessage != "" {
+		b.WriteString(errorStyle.Render(m.failMessage))
+	}
+	b.WriteString("\n\n")
 	return b.String()
 }

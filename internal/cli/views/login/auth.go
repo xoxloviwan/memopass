@@ -48,12 +48,10 @@ type AuthPage struct {
 	height int
 }
 
-func NewAuthPage() (AuthPage, error) {
-	InitLogin()
-	InitSignUp()
+func NewAuthPage(onEnter Callback) AuthPage {
 	ap := AuthPage{
 		TabContent: []modelForm{
-			InitLogin(),
+			InitLogin(onEnter),
 			InitSignUp(),
 		},
 		Tabs: make(map[int]Tab),
@@ -61,7 +59,7 @@ func NewAuthPage() (AuthPage, error) {
 	for i := range ap.TabContent {
 		ap.Tabs[i] = Tab{Name: ap.TabContent[i].name}
 	}
-	return ap, nil
+	return ap
 }
 
 func (ap *AuthPage) Init(width, height int) {

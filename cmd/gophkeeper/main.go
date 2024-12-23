@@ -29,7 +29,7 @@ func init() {
 }
 
 func main() {
-	m, err := views.NewSampleConfigUI()
+	m, err := views.NewApp()
 	if err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(1)

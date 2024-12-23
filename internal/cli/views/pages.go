@@ -1,54 +1,52 @@
 package views
 
 import (
+	"iwakho/gopherkeep/internal/cli/views/list"
 	"iwakho/gopherkeep/internal/cli/views/login"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-const (
-	FirstPage = iota
-	NextPage
-)
+// inspired by github.com/sspaink/telegraf-companion
 
 var (
 	ready bool
 )
 
-// A global value because SampleConfigUI update and view are pass by value to adhere to tea.Model interface
-// This is to allow other page instances to change it
-var currentPage = FirstPage
+var currentPage = 0
 
-type Pages interface {
+type Page interface {
 	Init(int, int)
 	Update(tea.Model, tea.Msg) (tea.Model, tea.Cmd)
 	View() string
 }
 
-type SampleConfigUI struct {
-	pages []Pages
+type App struct {
+	pages []Page
 }
 
-func NewSampleConfigUI() (SampleConfigUI, error) {
-	// w := NewWelcomePage()
-	p, err := login.NewAuthPage()
-	if err != nil {
-		return SampleConfigUI{}, err
+func NewApp() (App, error) {
+	var pages []Page
+	app := App{}
+	onEnter := func() {
+		currentPage = 1
 	}
 
-	var pages []Pages
-	// pages = append(pages, &w)
-	pages = append(pages, &p)
+	ap := login.NewAuthPage(onEnter)
+	lp := list.NewListPage()
+	pages = append(pages, &ap)
+	pages = append(pages, &lp)
+	app.pages = pages
 
-	return SampleConfigUI{pages: pages}, nil
+	return app, nil
 }
 
-func (s SampleConfigUI) Init() tea.Cmd {
+func (s App) Init() tea.Cmd {
 	return tea.Batch(tea.EnterAltScreen, tea.EnableMouseCellMotion)
 }
 
-func (s SampleConfigUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) { //nolint:revive
+func (s App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		if !ready {
 			ready = true
@@ -62,7 +60,7 @@ func (s SampleConfigUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return model, cmd
 }
 
-func (s SampleConfigUI) View() string {
+func (s App) View() string {
 	if !ready {
 		return "\n  Initializing..."
 	}
