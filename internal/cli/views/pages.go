@@ -26,17 +26,15 @@ type App struct {
 }
 
 func NewApp() (App, error) {
-	var pages []Page
-	app := App{}
+	app := App{pages: make([]Page, 2)}
 	onEnter := func() {
 		currentPage = 1
 	}
 
 	ap := login.NewAuthPage(onEnter)
 	lp := list.NewListPage()
-	pages = append(pages, &ap)
-	pages = append(pages, &lp)
-	app.pages = pages
+	app.pages[0] = &ap
+	app.pages[1] = &lp
 
 	return app, nil
 }

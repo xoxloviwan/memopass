@@ -41,6 +41,8 @@ tasks:
     desc: Make cert for dev
     cmds:
       - mkdir certs; cd certs; mkcert localhost 127.0.0.1
+      - mv certs/localhost+1.pem certs/cert.pem
+      - mv certs/localhost+1-key.pem certs/key.pem
 
   install_sqlite:
     desc: Install sqlite3

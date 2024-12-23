@@ -41,6 +41,7 @@ type modelForm struct {
 	failMessage  string
 	isLogin      bool
 	onEnter      Callback
+	isUpdated    bool
 }
 
 func InitLogin(onEnter Callback) modelForm {
@@ -131,8 +132,9 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
-			if s == "enter" && m.focusIndex == len(m.inputs) {
+			if s == "enter" && m.focusIndex == len(m.inputs) && m.isUpdated {
 				if m.isLogin {
+					m.isUpdated = false
 					login := m.inputs[0].Value()
 					password := m.inputs[1].Value()
 					if err := ctrls.TryLogin(login, password); err != nil {
@@ -185,6 +187,9 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *modelForm) updateInputs(msg tea.Msg) tea.Cmd {
 	m.failMessage = ""
+	if keymsg, ok := msg.(tea.KeyMsg); ok && keymsg.Type == tea.KeyRunes {
+		m.isUpdated = true
+	}
 	cmds := make([]tea.Cmd, len(m.inputs))
 
 	// Only text inputs with Focus() set will respond, so it's safe to simply
