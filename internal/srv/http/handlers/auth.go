@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"iwakho/gopherkeep/internal/srv/jwt"
-	"iwakho/gopherkeep/internal/srv/model"
+	"iwakho/gopherkeep/internal/model"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"

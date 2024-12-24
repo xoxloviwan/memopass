@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
-	"iwakho/gopherkeep/internal/srv/model"
+	"iwakho/gopherkeep/internal/model"
 
 	_ "github.com/mattn/go-sqlite3"
 )

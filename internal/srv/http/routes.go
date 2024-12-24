@@ -5,7 +5,7 @@ import (
 	"iwakho/gopherkeep/internal/srv/http/handlers"
 	"iwakho/gopherkeep/internal/srv/http/middleware"
 	"iwakho/gopherkeep/internal/srv/log"
-	"iwakho/gopherkeep/internal/srv/model"
+	"iwakho/gopherkeep/internal/model"
 	"net/http"
 
 	"github.com/go-pkgz/routegroup"

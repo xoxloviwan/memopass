@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"iwakho/gopherkeep/internal/srv/jwt"
-	"iwakho/gopherkeep/internal/srv/model"
+	"iwakho/gopherkeep/internal/model"
 	"net/http"
 	"strings"
 )

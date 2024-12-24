@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"iwakho/gopherkeep/internal/srv/model"
+	"iwakho/gopherkeep/internal/model"
 )
 
 type Store interface {

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"iwakho/gopherkeep/internal/srv/model"
+	"iwakho/gopherkeep/internal/model"
 	"net/http"
 	"strconv"
 	"time"

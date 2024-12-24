@@ -4,6 +4,7 @@ package login
 // from the Bubbles component library.
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -79,13 +80,14 @@ func InitLogin(onEnter Callback) modelForm {
 	return m
 }
 
-func InitSignUp() modelForm {
+func InitSignUp(onEnter Callback) modelForm {
 	m := modelForm{
 		name:   "Регистрация",
 		inputs: make([]textinput.Model, 3),
 		submitButton: button{
 			title: "Зарегистрироваться",
 		},
+		onEnter: onEnter,
 	}
 	var t textinput.Model
 	for i := range m.inputs {
@@ -133,18 +135,28 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) && m.isUpdated {
+				m.isUpdated = false
+				login := m.inputs[0].Value()
+				password := m.inputs[1].Value()
+				var err error
 				if m.isLogin {
-					m.isUpdated = false
-					login := m.inputs[0].Value()
-					password := m.inputs[1].Value()
-					if err := ctrls.TryLogin(login, password); err != nil {
-						m.failMessage = err.Error()
-						return m, nil
+					err = ctrls.TryLogin(login, password)
+				} else {
+					passwordRepeated := m.inputs[2].Value()
+					if password == passwordRepeated {
+						err = ctrls.SignUp(login, password)
+					} else {
+						err = errors.New("Пароли не совпадают")
 					}
-					m.onEnter()
+				}
+				if err != nil {
+					m.failMessage = err.Error()
 					return m, nil
 				}
-				return m, tea.Quit
+				if m.onEnter != nil {
+					m.onEnter()
+				}
+				return m, nil
 			}
 
 			// Cycle indexes
@@ -186,8 +198,8 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *modelForm) updateInputs(msg tea.Msg) tea.Cmd {
-	m.failMessage = ""
 	if keymsg, ok := msg.(tea.KeyMsg); ok && keymsg.Type == tea.KeyRunes {
+		m.failMessage = ""
 		m.isUpdated = true
 	}
 	cmds := make([]tea.Cmd, len(m.inputs))
@@ -222,6 +234,8 @@ func (m modelForm) View() string {
 	if m.failMessage != "" {
 		b.WriteString(errorStyle.Render(m.failMessage))
 	}
-	b.WriteString("\n\n")
+	if m.isLogin {
+		b.WriteString("\n")
+	}
 	return b.String()
 }

@@ -52,7 +52,7 @@ func NewAuthPage(onEnter Callback) AuthPage {
 	ap := AuthPage{
 		TabContent: []modelForm{
 			InitLogin(onEnter),
-			InitSignUp(),
+			InitSignUp(onEnter),
 		},
 		Tabs: make(map[int]Tab),
 	}
