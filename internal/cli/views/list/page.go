@@ -22,21 +22,50 @@ func (lp *listPage) View() string {
 	return lp.Model.View()
 }
 
-func NewListPage() listPage {
-	items := []list.Item{
-		item("Логины/пароли"),
-		item("Заметки"),
-		item("Файлы"),
-		item("Данные банковских карт"),
-	}
+type baseList struct {
+	items []list.Item
+	title string
+}
 
+const mainTitle = "Разделы"
+const backAction = "Назад"
+
+func mainItems() baseList {
+	return baseList{
+		items: []list.Item{
+			item("Логины/пароли"),
+			item("Заметки"),
+			item("Файлы"),
+			item("Данные банковских карт"),
+		},
+		title: mainTitle,
+	}
+}
+
+func actionItems(title string) baseList {
+	return baseList{
+		items: []list.Item{
+			item("Добавить"),
+			item("Посмотреть"),
+			item(backAction),
+		},
+		title: title,
+	}
+}
+
+func listModel(lst baseList) list.Model {
 	const defaultWidth = 20
 
-	l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
-	l.Title = "Разделы"
+	l := list.New(lst.items, itemDelegate{}, defaultWidth, listHeight)
+	l.Title = lst.title
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.PaginationStyle = paginationStyle
 	l.Styles.HelpStyle = helpStyle
+	return l
+}
+
+func NewListPage() listPage {
+	l := listModel(mainItems())
 	return listPage{modelList{list: l}, 0, 0}
 }

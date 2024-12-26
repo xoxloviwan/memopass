@@ -19,9 +19,14 @@ var (
 	quitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
 )
 
+type choice struct {
+	item   string
+	action string
+}
+
 type modelList struct {
 	list     list.Model
-	choice   string
+	choose   choice
 	quitting bool
 }
 
@@ -44,9 +49,20 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
-				m.choice = string(i)
+				if m.list.Title == mainTitle {
+					m.list = listModel(actionItems(string(i)))
+				} else {
+					if string(i) == backAction {
+						m.list = listModel(mainItems())
+					} else {
+						m.choose = choice{
+							item:   m.list.Title,
+							action: string(i),
+						}
+					}
+				}
 			}
-			return m, tea.Quit
+			return m, nil
 		}
 	}
 
@@ -57,8 +73,8 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m modelList) View() string {
 
-	if m.choice != "" {
-		return quitTextStyle.Render(fmt.Sprintf("%s? Понятно", m.choice))
+	if m.choose.action != "" {
+		return quitTextStyle.Render(fmt.Sprintf("Выбор сделан! %s %s", m.choose.item, m.choose.action))
 	}
 	if m.quitting {
 		return quitTextStyle.Render("Ничего не нужно? Ну пока!")
