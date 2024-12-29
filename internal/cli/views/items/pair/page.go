@@ -11,14 +11,16 @@ type pairPage struct {
 }
 
 func NewPairPage(nextPage func()) *pairPage {
-	return &pairPage{InitPair(), 0, 0}
+	return &pairPage{InitPair(nextPage), 0, 0}
 }
 
 func (pp *pairPage) Init(width, height int) {
 	pp.width = width
 }
 func (pp *pairPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
-	return pp.Model.Update(msg)
+	model, cmd := pp.Model.Update(msg)
+	pp.Model = model.(modelPair)
+	return m, cmd
 }
 
 func (pp *pairPage) View() string {

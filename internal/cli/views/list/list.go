@@ -50,8 +50,8 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
 				if m.list.Title == mainTitle {
-					m.list = listModel(actionItems(string(i)))
 					m.takenItemID = m.list.Index()
+					m.list = listModel(actionItems(string(i)))
 				} else {
 					switch string(i) {
 					case AddItem:
