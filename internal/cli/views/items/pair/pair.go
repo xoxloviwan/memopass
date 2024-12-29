@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	ctrl "iwakho/gopherkeep/internal/cli/controls"
+	btn "iwakho/gopherkeep/internal/cli/views/button"
+
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -11,26 +14,35 @@ import (
 )
 
 var (
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle         = focusedStyle
+	focusedStyle        = btn.FocusedStyle
+	cursorStyle         = btn.FocusedStyle
 	noStyle             = lipgloss.NewStyle()
-	helpStyle           = blurredStyle
+	helpStyle           = btn.BlurredStyle
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-
-	focusedButton = focusedStyle.Render("[ Добавить ]")
-	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Добавить"))
 )
+
+type button string
 
 type modelPair struct {
 	focusIndex int
 	inputs     []textinput.Model
 	cursorMode cursor.Mode
+	nextPage   func()
+	buttons    []button
+	indexMax   int
 }
 
-func InitPair() modelPair {
+const (
+	submitButton = "Добавить"
+	backButton   = "Назад"
+)
+
+func InitPair(nextPage func()) modelPair {
+
 	m := modelPair{
-		inputs: make([]textinput.Model, 2),
+		inputs:   make([]textinput.Model, 2),
+		nextPage: nextPage,
+		buttons:  make([]button, 2),
 	}
 
 	var t textinput.Model
@@ -53,6 +65,9 @@ func InitPair() modelPair {
 
 		m.inputs[i] = t
 	}
+	m.buttons[0] = submitButton
+	m.buttons[1] = backButton
+	m.indexMax = len(m.inputs) + len(m.buttons) - 1
 
 	return m
 }
@@ -69,7 +84,7 @@ func (m modelPair) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		// Change cursor mode
-		case "ctrl+p":
+		case "ctrl+r":
 			switch m.inputs[1].EchoMode {
 			case textinput.EchoNormal:
 				m.inputs[1].EchoMode = textinput.EchoPassword
@@ -85,7 +100,13 @@ func (m modelPair) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				return m, tea.Quit
+				ctrl.AddPair(m.inputs[0].Value(), m.inputs[1].Value())
+				return m, nil
+			}
+
+			if s == "enter" && m.focusIndex == len(m.inputs)+1 {
+				m.nextPage()
+				return m, nil
 			}
 
 			// Cycle indexes
@@ -95,10 +116,10 @@ func (m modelPair) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusIndex++
 			}
 
-			if m.focusIndex > len(m.inputs) {
+			if m.focusIndex > m.indexMax {
 				m.focusIndex = 0
 			} else if m.focusIndex < 0 {
-				m.focusIndex = len(m.inputs)
+				m.focusIndex = m.indexMax
 			}
 
 			cmds := make([]tea.Cmd, len(m.inputs))
@@ -148,15 +169,14 @@ func (m modelPair) View() string {
 		}
 	}
 
-	button := &blurredButton
-	if m.focusIndex == len(m.inputs) {
-		button = &focusedButton
+	for i := range m.buttons {
+		b.WriteRune('\n')
+		btn.RenderButton(&b, string(m.buttons[i]), m.focusIndex == i+len(m.inputs))
 	}
-	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
 
-	b.WriteString(helpStyle.Render("cursor mode is "))
-	b.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
-	b.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
+	b.WriteString(helpStyle.Render("echoMode is "))
+	b.WriteString(cursorModeHelpStyle.Render(fmt.Sprintf("%d", m.inputs[1].EchoMode)))
+	b.WriteString(helpStyle.Render(" (ctrl+r to change mode)"))
 
 	return b.String()
 }

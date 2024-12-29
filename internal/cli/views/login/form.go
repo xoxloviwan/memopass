@@ -5,10 +5,10 @@ package login
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	ctrls "iwakho/gopherkeep/internal/cli/controls"
+	btn "iwakho/gopherkeep/internal/cli/views/button"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	focusedStyle        = btn.FocusedStyle
 	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	cursorStyle         = focusedStyle
 	noStyle             = lipgloss.NewStyle()
@@ -223,13 +223,8 @@ func (m modelForm) View() string {
 		}
 	}
 
-	button := fmt.Sprintf("[ %s ]", blurredStyle.Render(m.submitButton.title))
-	m.submitButton.focused = m.focusIndex == len(m.inputs)
-	if m.submitButton.focused {
-		button = focusedStyle.Render(fmt.Sprintf("[ %s ]", m.submitButton.title))
-	}
-
-	fmt.Fprintf(&b, "\n\n%s\n", button)
+	b.WriteString("\n\n")
+	btn.RenderButton(&b, m.submitButton.title, m.focusIndex == len(m.inputs))
 
 	if m.failMessage != "" {
 		b.WriteString(errorStyle.Render(m.failMessage))
