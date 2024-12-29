@@ -15,7 +15,9 @@ func (lp *listPage) Init(width, height int) {
 	lp.width = width
 }
 func (lp *listPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
-	return lp.Model.Update(msg)
+	model, cmd := lp.Model.Update(msg)
+	lp.Model = model.(modelList)
+	return m, cmd
 }
 
 func (lp *listPage) View() string {
@@ -27,16 +29,26 @@ type baseList struct {
 	title string
 }
 
-const mainTitle = "Разделы"
-const backAction = "Назад"
+const (
+	mainTitle  = "Разделы"
+	backAction = "Назад"
+
+	Pairs = "Логины/пароли"
+	Notes = "Заметки"
+	Files = "Файлы"
+	Cards = "Данные банковских карт"
+
+	AddItem  = "Добавить"
+	ShowItem = "Посмотреть"
+)
 
 func mainItems() baseList {
 	return baseList{
 		items: []list.Item{
-			item("Логины/пароли"),
-			item("Заметки"),
-			item("Файлы"),
-			item("Данные банковских карт"),
+			item(Pairs),
+			item(Notes),
+			item(Files),
+			item(Cards),
 		},
 		title: mainTitle,
 	}
@@ -45,8 +57,8 @@ func mainItems() baseList {
 func actionItems(title string) baseList {
 	return baseList{
 		items: []list.Item{
-			item("Добавить"),
-			item("Посмотреть"),
+			item(AddItem),
+			item(ShowItem),
 			item(backAction),
 		},
 		title: title,
@@ -65,7 +77,7 @@ func listModel(lst baseList) list.Model {
 	return l
 }
 
-func NewListPage() listPage {
+func NewListPage(nextPage func(int)) *listPage {
 	l := listModel(mainItems())
-	return listPage{modelList{list: l}, 0, 0}
+	return &listPage{modelList{list: l, nextPage: nextPage}, 0, 0}
 }

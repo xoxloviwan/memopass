@@ -1,8 +1,6 @@
 package list
 
 import (
-	"fmt"
-
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -25,9 +23,11 @@ type choice struct {
 }
 
 type modelList struct {
-	list     list.Model
-	choose   choice
-	quitting bool
+	list        list.Model
+	takenItemID int
+	choose      choice
+	quitting    bool
+	nextPage    func(int)
 }
 
 func (m modelList) Init() tea.Cmd {
@@ -51,14 +51,16 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				if m.list.Title == mainTitle {
 					m.list = listModel(actionItems(string(i)))
+					m.takenItemID = m.list.Index()
 				} else {
-					if string(i) == backAction {
+					switch string(i) {
+					case AddItem:
+						m.nextPage(m.takenItemID)
+						return m, nil
+					case ShowItem:
+
+					default:
 						m.list = listModel(mainItems())
-					} else {
-						m.choose = choice{
-							item:   m.list.Title,
-							action: string(i),
-						}
 					}
 				}
 			}
@@ -72,10 +74,6 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m modelList) View() string {
-
-	if m.choose.action != "" {
-		return quitTextStyle.Render(fmt.Sprintf("Выбор сделан! %s %s", m.choose.item, m.choose.action))
-	}
 	if m.quitting {
 		return quitTextStyle.Render("Ничего не нужно? Ну пока!")
 	}

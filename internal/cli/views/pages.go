@@ -1,6 +1,7 @@
 package views
 
 import (
+	"iwakho/gopherkeep/internal/cli/views/items/pair"
 	"iwakho/gopherkeep/internal/cli/views/list"
 	"iwakho/gopherkeep/internal/cli/views/login"
 
@@ -12,6 +13,8 @@ import (
 var (
 	ready bool
 )
+
+const pageTotal = 3
 
 var currentPage = 0
 
@@ -25,16 +28,28 @@ type App struct {
 	pages []Page
 }
 
-func NewApp() (App, error) {
-	app := App{pages: make([]Page, 2)}
-	onEnter := func() {
-		currentPage = 1
+func nextPage(id int) func() {
+	return func() {
+		currentPage = id
 	}
+}
 
-	ap := login.NewAuthPage(onEnter)
-	lp := list.NewListPage()
-	app.pages[0] = &ap
-	app.pages[1] = &lp
+func NewApp() (App, error) {
+	app := App{pages: make([]Page, pageTotal)}
+
+	app.pages[0] = login.NewAuthPage(nextPage(1))
+
+	app.pages[1] = list.NewListPage(func(id int) {
+		const offset = 2
+		nextPage := id + offset
+		if nextPage < pageTotal {
+			currentPage = nextPage
+		} else {
+			currentPage = 1
+		}
+	})
+	app.pages[2] = pair.NewPairPage(nextPage(1))
+	//app.pages[3] = pair.NewPairPage(nextPage(1))
 
 	return app, nil
 }
