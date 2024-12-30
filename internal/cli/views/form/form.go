@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	btn "iwakho/gopherkeep/internal/cli/views/button"
+	"iwakho/gopherkeep/internal/model"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -22,7 +23,7 @@ var (
 )
 
 type Control interface {
-	Submit(login string, password string) error
+	Submit(p model.Pair) error
 }
 
 type ModelForm struct {
@@ -110,7 +111,7 @@ func (m ModelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				}
 				if err == nil {
-					err = m.Submit(login, password)
+					err = m.Submit(model.Pair{Login: login, Password: password})
 				}
 				if err != nil {
 					m.failMessage = err.Error()

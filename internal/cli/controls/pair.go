@@ -10,18 +10,16 @@ import (
 	"net/http"
 )
 
-type AddPairCtrl struct {
-	model.Pair
-}
+type AddPairCtrl struct{}
 
-func (ctrl AddPairCtrl) Submit(login string, password string) error {
+func (AddPairCtrl) Submit(p model.Pair) error {
 	body := new(bytes.Buffer)
 	w := multipart.NewWriter(body)
-	err := w.WriteField("login", login)
+	err := w.WriteField("login", p.Login)
 	if err != nil {
 		return err
 	}
-	err = w.WriteField("password", password)
+	err = w.WriteField("password", p.Password)
 	if err != nil {
 		return err
 	}

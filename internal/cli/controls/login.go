@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	iHttp "iwakho/gopherkeep/internal/cli/http"
-
-	// "iwakho/gopherkeep/internal/cli/views/login"
 	"iwakho/gopherkeep/internal/model"
 	"net/http"
 )
@@ -15,16 +13,14 @@ var (
 	token string
 )
 
-type LoginCtrl struct {
-	model.Pair
-}
+type LoginCtrl struct{}
 
-func (ctrl LoginCtrl) Submit(login string, password string) error {
+func (LoginCtrl) Submit(p model.Pair) error {
 	r, err := http.NewRequest("GET", iHttp.ApiLogin, nil)
 	if err != nil {
 		return fmt.Errorf("Bad request: url=%s e=%s", iHttp.ApiLogin, err)
 	}
-	r.SetBasicAuth(login, password)
+	r.SetBasicAuth(p.Login, p.Password)
 	resp, err := iHttp.Client.Do(r)
 	if err != nil {
 		return err
@@ -40,14 +36,12 @@ func (ctrl LoginCtrl) Submit(login string, password string) error {
 	return nil
 }
 
-type SignUpCtrl struct {
-	model.Pair
-}
+type SignUpCtrl struct{}
 
-func (ctrl SignUpCtrl) Submit(login string, password string) error {
+func (SignUpCtrl) Submit(p model.Pair) error {
 	creds := model.Creds{
-		User: login,
-		Pwd:  password,
+		User: p.Login,
+		Pwd:  p.Password,
 	}
 	body, err := json.Marshal(creds)
 	if err != nil {
