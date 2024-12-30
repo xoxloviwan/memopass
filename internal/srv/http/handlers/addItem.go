@@ -15,7 +15,7 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	itemTypeStr := r.PostForm.Get("type")
+	itemTypeStr := r.URL.Query().Get("type")
 	itemType, err := strconv.Atoi(itemTypeStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

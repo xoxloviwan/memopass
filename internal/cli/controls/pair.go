@@ -12,11 +12,7 @@ import (
 func AddPair(login string, password string) error {
 	body := new(bytes.Buffer)
 	w := multipart.NewWriter(body)
-	err := w.WriteField("type", "0")
-	if err != nil {
-		return err
-	}
-	err = w.WriteField("login", login)
+	err := w.WriteField("login", login)
 	if err != nil {
 		return err
 	}
@@ -34,6 +30,9 @@ func AddPair(login string, password string) error {
 	}
 	r.Header.Set("Authorization", token)
 	r.Header.Set("Content-Type", w.FormDataContentType())
+	q := r.URL.Query()
+	q.Add("type", "0")
+	r.URL.RawQuery = q.Encode()
 	resp, err := iHttp.Client.Do(r)
 	if err != nil {
 		return err
