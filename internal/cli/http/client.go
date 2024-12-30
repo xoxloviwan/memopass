@@ -8,12 +8,18 @@ import (
 )
 
 var (
-	Client  http.Client
-	BaseURL string
+	Client     http.Client
+	BaseURL    string
+	ApiLogin   string
+	ApiSignUp  string
+	ApiAddItem string
 )
 
 func InitClient(certPath string, baseURL string) error {
 	BaseURL = baseURL + "/api/v1"
+	ApiLogin = BaseURL + "/user/login"
+	ApiSignUp = BaseURL + "/user/signup"
+	ApiAddItem = BaseURL + "/item/add"
 	if certPath == "" {
 		Client = http.Client{}
 		return nil

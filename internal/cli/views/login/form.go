@@ -23,7 +23,6 @@ var (
 	noStyle             = lipgloss.NewStyle()
 	helpStyle           = blurredStyle
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-	errorStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("#f00"))
 )
 
 type button struct {
@@ -227,7 +226,7 @@ func (m modelForm) View() string {
 	btn.RenderButton(&b, m.submitButton.title, m.focusIndex == len(m.inputs))
 
 	if m.failMessage != "" {
-		b.WriteString(errorStyle.Render(m.failMessage))
+		b.WriteString(btn.ErrorStyle.Render(m.failMessage))
 	}
 	if m.isLogin {
 		b.WriteString("\n")

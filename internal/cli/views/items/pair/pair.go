@@ -24,12 +24,13 @@ var (
 type button string
 
 type modelPair struct {
-	focusIndex int
-	inputs     []textinput.Model
-	cursorMode cursor.Mode
-	nextPage   func()
-	buttons    []button
-	indexMax   int
+	focusIndex  int
+	inputs      []textinput.Model
+	cursorMode  cursor.Mode
+	nextPage    func()
+	buttons     []button
+	indexMax    int
+	failMessage string
 }
 
 const (
@@ -100,7 +101,10 @@ func (m modelPair) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				ctrl.AddPair(m.inputs[0].Value(), m.inputs[1].Value())
+				err := ctrl.AddPair(m.inputs[0].Value(), m.inputs[1].Value())
+				if err != nil {
+					m.failMessage = err.Error()
+				}
 				return m, nil
 			}
 
@@ -173,6 +177,11 @@ func (m modelPair) View() string {
 		b.WriteRune('\n')
 		btn.RenderButton(&b, string(m.buttons[i]), m.focusIndex == i+len(m.inputs))
 	}
+
+	if m.failMessage != "" {
+		b.WriteString(btn.ErrorStyle.Render(m.failMessage))
+	}
+	b.WriteRune('\n')
 
 	b.WriteString(helpStyle.Render("echoMode is "))
 	b.WriteString(cursorModeHelpStyle.Render(fmt.Sprintf("%d", m.inputs[1].EchoMode)))

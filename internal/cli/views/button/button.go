@@ -10,6 +10,7 @@ import (
 var (
 	FocusedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	BlurredStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	ErrorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#f00"))
 )
 
 func RenderButton(sb *strings.Builder, btn string, focused bool) {

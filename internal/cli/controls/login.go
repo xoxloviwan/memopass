@@ -14,10 +14,9 @@ var (
 )
 
 func TryLogin(login string, password string) error {
-	loginUrl := iHttp.BaseURL + "/user/login"
-	r, err := http.NewRequest("GET", loginUrl, nil)
+	r, err := http.NewRequest("GET", iHttp.ApiLogin, nil)
 	if err != nil {
-		return fmt.Errorf("Bad request: url=%s e=%s", loginUrl, err)
+		return fmt.Errorf("Bad request: url=%s e=%s", iHttp.ApiLogin, err)
 	}
 	r.SetBasicAuth(login, password)
 	resp, err := iHttp.Client.Do(r)
@@ -36,7 +35,6 @@ func TryLogin(login string, password string) error {
 }
 
 func SignUp(login string, password string) error {
-	signUpUrl := iHttp.BaseURL + "/user/signup"
 	creds := model.Creds{
 		User: login,
 		Pwd:  password,
@@ -45,10 +43,10 @@ func SignUp(login string, password string) error {
 	if err != nil {
 		return err
 	}
-	r, err := http.NewRequest("POST", signUpUrl, bytes.NewBuffer(body))
+	r, err := http.NewRequest("POST", iHttp.ApiSignUp, bytes.NewBuffer(body))
 	r.Header.Set("Content-Type", "application/json")
 	if err != nil {
-		return fmt.Errorf("Bad request: url=%s e=%s", signUpUrl, err)
+		return fmt.Errorf("Bad request: url=%s e=%s", iHttp.ApiSignUp, err)
 	}
 	resp, err := iHttp.Client.Do(r)
 	if err != nil {
