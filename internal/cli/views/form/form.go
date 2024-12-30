@@ -1,13 +1,10 @@
 package form
 
-// A simple example demonstrating the use of multiple text input components
-// from the Bubbles component library.
-
 import (
 	"errors"
+	"fmt"
 	"strings"
 
-	ctrls "iwakho/gopherkeep/internal/cli/controls"
 	btn "iwakho/gopherkeep/internal/cli/views/button"
 
 	"github.com/charmbracelet/bubbles/cursor"
@@ -18,114 +15,82 @@ import (
 
 var (
 	focusedStyle        = btn.FocusedStyle
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle         = focusedStyle
+	cursorStyle         = btn.FocusedStyle
 	noStyle             = lipgloss.NewStyle()
-	helpStyle           = blurredStyle
+	helpStyle           = btn.BlurredStyle
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 )
 
-type button struct {
-	title   string
-	focused bool
+type Control interface {
+	Submit(login string, password string) error
 }
 
-type Callback func()
-
-type modelForm struct {
-	name         string
-	focusIndex   int
-	inputs       []textinput.Model
-	cursorMode   cursor.Mode
-	submitButton button
-	failMessage  string
-	isLogin      bool
-	onEnter      Callback
-	isUpdated    bool
+type ModelForm struct {
+	Name        string
+	focusIndex  int
+	inputs      []textinput.Model
+	cursorMode  cursor.Mode
+	NextPage    func()
+	buttons     []string
+	indexMax    int
+	failMessage string
+	isUpdated   bool
+	Control
 }
 
-func InitLogin(onEnter Callback) modelForm {
-	m := modelForm{
-		name:   "Вход",
-		inputs: make([]textinput.Model, 2),
-		submitButton: button{
-			title: "Войти",
-		},
-		isLogin: true,
-		onEnter: onEnter,
+type FormCaller struct {
+	FormName    string
+	InputNames  []string
+	ButtonNames []string
+}
+
+func InitForm(fc FormCaller) ModelForm {
+	m := ModelForm{
+		Name:   fc.FormName,
+		inputs: make([]textinput.Model, len(fc.InputNames)),
 	}
-
+	m.buttons = fc.ButtonNames
 	var t textinput.Model
 	for i := range m.inputs {
 		t = textinput.New()
 		t.Cursor.Style = cursorStyle
 		t.CharLimit = 32
 
-		switch i {
-		case 0:
-			t.Placeholder = "Логин"
+		if i == 0 {
+			t.Placeholder = fc.InputNames[i]
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
-		case 1:
-			t.Placeholder = "Пароль"
+		} else {
+			t.Placeholder = fc.InputNames[i]
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
 		}
-
 		m.inputs[i] = t
 	}
-
+	m.indexMax = len(m.inputs) + len(m.buttons) - 1
 	return m
 }
 
-func InitSignUp(onEnter Callback) modelForm {
-	m := modelForm{
-		name:   "Регистрация",
-		inputs: make([]textinput.Model, 3),
-		submitButton: button{
-			title: "Зарегистрироваться",
-		},
-		onEnter: onEnter,
-	}
-	var t textinput.Model
-	for i := range m.inputs {
-		t = textinput.New()
-		t.Cursor.Style = cursorStyle
-		t.CharLimit = 32
-
-		switch i {
-		case 0:
-			t.Placeholder = "Придумайте логин"
-			t.Focus()
-			t.PromptStyle = focusedStyle
-			t.TextStyle = focusedStyle
-		case 1:
-			t.Placeholder = "Введите пароль"
-			t.EchoMode = textinput.EchoPassword
-			t.EchoCharacter = '•'
-		case 2:
-			t.Placeholder = "Повторите пароль"
-			t.EchoMode = textinput.EchoPassword
-			t.EchoCharacter = '•'
-		}
-
-		m.inputs[i] = t
-	}
-
-	return m
-}
-
-func (m modelForm) Init() tea.Cmd {
+func (m ModelForm) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m ModelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
 			return m, tea.Quit
+
+		case "ctrl+r":
+			switch m.inputs[1].EchoMode {
+			case textinput.EchoNormal:
+				m.inputs[1].EchoMode = textinput.EchoPassword
+			case textinput.EchoPassword:
+				m.inputs[1].EchoMode = textinput.EchoNormal
+			}
+			return m, nil
 
 		// Set focus to next input
 		case "tab", "shift+tab", "enter", "up", "down":
@@ -138,22 +103,28 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				login := m.inputs[0].Value()
 				password := m.inputs[1].Value()
 				var err error
-				if m.isLogin {
-					err = ctrls.TryLogin(login, password)
-				} else {
+				if len(m.inputs) == 3 {
 					passwordRepeated := m.inputs[2].Value()
-					if password == passwordRepeated {
-						err = ctrls.SignUp(login, password)
-					} else {
+					if password != passwordRepeated {
 						err = errors.New("Пароли не совпадают")
 					}
+				}
+				if err == nil {
+					err = m.Submit(login, password)
 				}
 				if err != nil {
 					m.failMessage = err.Error()
 					return m, nil
 				}
-				if m.onEnter != nil {
-					m.onEnter()
+				if m.NextPage != nil {
+					m.NextPage()
+				}
+				return m, nil
+			}
+
+			if s == "enter" && m.focusIndex == len(m.inputs)+1 { // back
+				if m.NextPage != nil {
+					m.NextPage()
 				}
 				return m, nil
 			}
@@ -165,10 +136,10 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusIndex++
 			}
 
-			if m.focusIndex > len(m.inputs) {
+			if m.focusIndex > m.indexMax {
 				m.focusIndex = 0
 			} else if m.focusIndex < 0 {
-				m.focusIndex = len(m.inputs)
+				m.focusIndex = m.indexMax
 			}
 
 			cmds := make([]tea.Cmd, len(m.inputs))
@@ -196,7 +167,7 @@ func (m modelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *modelForm) updateInputs(msg tea.Msg) tea.Cmd {
+func (m *ModelForm) updateInputs(msg tea.Msg) tea.Cmd {
 	if keymsg, ok := msg.(tea.KeyMsg); ok && keymsg.Type == tea.KeyRunes {
 		m.failMessage = ""
 		m.isUpdated = true
@@ -212,7 +183,7 @@ func (m *modelForm) updateInputs(msg tea.Msg) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (m modelForm) View() string {
+func (m ModelForm) View() string {
 	var b strings.Builder
 
 	for i := range m.inputs {
@@ -222,14 +193,19 @@ func (m modelForm) View() string {
 		}
 	}
 
-	b.WriteString("\n\n")
-	btn.RenderButton(&b, m.submitButton.title, m.focusIndex == len(m.inputs))
+	for i := range m.buttons {
+		b.WriteRune('\n')
+		btn.RenderButton(&b, string(m.buttons[i]), m.focusIndex == i+len(m.inputs))
+	}
 
 	if m.failMessage != "" {
 		b.WriteString(btn.ErrorStyle.Render(m.failMessage))
 	}
-	if m.isLogin {
-		b.WriteString("\n")
-	}
+	b.WriteRune('\n')
+
+	b.WriteString(helpStyle.Render("echoMode is "))
+	b.WriteString(cursorModeHelpStyle.Render(fmt.Sprintf("%d", m.inputs[1].EchoMode)))
+	b.WriteString(helpStyle.Render(" (ctrl+r to change mode)"))
+
 	return b.String()
 }

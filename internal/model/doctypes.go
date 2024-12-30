@@ -14,8 +14,12 @@ type Metainfo struct {
 	Text string    `json:"info"`
 }
 
-type Pairs struct {
-	Login    string   `json:"login"`
-	Password string   `json:"password"`
-	Meta     Metainfo `json:"meta"`
+type Pair struct {
+	Login    string `json:"login"`
+	Password string `json:"password"`
+}
+
+type PairInfo struct {
+	Pair
+	Meta Metainfo `json:"meta"`
 }

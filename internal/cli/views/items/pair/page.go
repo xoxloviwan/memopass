@@ -1,11 +1,15 @@
 package pair
 
 import (
+	"iwakho/gopherkeep/internal/cli/views/form"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type modelForm = form.ModelForm
+
 type pairPage struct {
-	Model  modelPair
+	Model  modelForm
 	width  int
 	height int
 }
@@ -19,7 +23,7 @@ func (pp *pairPage) Init(width, height int) {
 }
 func (pp *pairPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 	model, cmd := pp.Model.Update(msg)
-	pp.Model = model.(modelPair)
+	pp.Model = model.(modelForm)
 	return m, cmd
 }
 

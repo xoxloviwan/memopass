@@ -2,6 +2,7 @@ package login
 
 import (
 	"fmt"
+	"iwakho/gopherkeep/internal/cli/views/form"
 	"sort"
 	"strings"
 
@@ -35,6 +36,8 @@ var (
 				Border(lipgloss.NormalBorder()).UnsetBorderTop()
 )
 
+type modelForm = form.ModelForm
+
 type Tab struct {
 	Name string
 }
@@ -48,7 +51,7 @@ type AuthPage struct {
 	height int
 }
 
-func NewAuthPage(onEnter Callback) *AuthPage {
+func NewAuthPage(onEnter func()) *AuthPage {
 	ap := AuthPage{
 		TabContent: []modelForm{
 			InitLogin(onEnter),
@@ -57,7 +60,7 @@ func NewAuthPage(onEnter Callback) *AuthPage {
 		Tabs: make(map[int]Tab),
 	}
 	for i := range ap.TabContent {
-		ap.Tabs[i] = Tab{Name: ap.TabContent[i].name}
+		ap.Tabs[i] = Tab{Name: ap.TabContent[i].Name}
 	}
 	return &ap
 }

@@ -23,9 +23,11 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 	switch itemType {
 	case model.ItemTypeLoginPass:
-		pairs := model.Pairs{
-			Login:    r.PostForm.Get("login"),
-			Password: r.PostForm.Get("password"),
+		pairs := model.PairInfo{
+			Pair: model.Pair{
+				Login:    r.PostForm.Get("login"),
+				Password: r.PostForm.Get("password"),
+			},
 			Meta: model.Metainfo{
 				Date: time.Now(),
 				Text: r.PostForm.Get("meta"),

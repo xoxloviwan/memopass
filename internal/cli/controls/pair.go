@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"io"
 	iHttp "iwakho/gopherkeep/internal/cli/http"
+	"iwakho/gopherkeep/internal/model"
 	"mime/multipart"
 	"net/http"
 )
 
-func AddPair(login string, password string) error {
+type AddPairCtrl struct {
+	model.Pair
+}
+
+func (ctrl AddPairCtrl) Submit(login string, password string) error {
 	body := new(bytes.Buffer)
 	w := multipart.NewWriter(body)
 	err := w.WriteField("login", login)
