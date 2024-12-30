@@ -1,4 +1,4 @@
-package login
+package form
 
 // A simple example demonstrating the use of multiple text input components
 // from the Bubbles component library.
