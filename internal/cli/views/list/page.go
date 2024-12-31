@@ -6,7 +6,7 @@ import (
 )
 
 type listPage struct {
-	Model  modelList
+	Model  ModelList
 	width  int
 	height int
 }
@@ -16,7 +16,7 @@ func (lp *listPage) Init(width, height int) {
 }
 func (lp *listPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 	model, cmd := lp.Model.Update(msg)
-	lp.Model = model.(modelList)
+	lp.Model = model.(ModelList)
 	return m, cmd
 }
 
@@ -24,9 +24,9 @@ func (lp *listPage) View() string {
 	return lp.Model.View()
 }
 
-type baseList struct {
-	items []list.Item
-	title string
+type BaseList struct {
+	Items []list.Item
+	Title string
 }
 
 const (
@@ -42,34 +42,34 @@ const (
 	ShowItem = "Посмотреть"
 )
 
-func mainItems() baseList {
-	return baseList{
-		items: []list.Item{
-			item(Pairs),
-			item(Notes),
-			item(Files),
-			item(Cards),
+func mainItems() BaseList {
+	return BaseList{
+		Items: []list.Item{
+			Item{Title: Pairs},
+			Item{Title: Notes},
+			Item{Title: Files},
+			Item{Title: Cards},
 		},
-		title: mainTitle,
+		Title: mainTitle,
 	}
 }
 
-func actionItems(title string) baseList {
-	return baseList{
-		items: []list.Item{
-			item(AddItem),
-			item(ShowItem),
-			item(backAction),
+func actionItems(title string) BaseList {
+	return BaseList{
+		Items: []list.Item{
+			Item{Title: AddItem},
+			Item{Title: ShowItem},
+			Item{Title: backAction},
 		},
-		title: title,
+		Title: title,
 	}
 }
 
-func listModel(lst baseList) list.Model {
+func ListModel(lst BaseList) list.Model {
 	const defaultWidth = 20
 
-	l := list.New(lst.items, itemDelegate{}, defaultWidth, listHeight)
-	l.Title = lst.title
+	l := list.New(lst.Items, itemDelegate{}, defaultWidth, listHeight)
+	l.Title = lst.Title
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.PaginationStyle = paginationStyle
@@ -78,6 +78,6 @@ func listModel(lst baseList) list.Model {
 }
 
 func NewListPage(nextPage func(int)) *listPage {
-	l := listModel(mainItems())
-	return &listPage{modelList{list: l, nextPage: nextPage}, 0, 0}
+	l := ListModel(mainItems())
+	return &listPage{ModelList{List: l, NextPage: nextPage}, 0, 0}
 }

@@ -22,22 +22,22 @@ type choice struct {
 	action string
 }
 
-type modelList struct {
-	list        list.Model
+type ModelList struct {
+	List        list.Model
 	takenItemID int
 	choose      choice
 	quitting    bool
-	nextPage    func(int)
+	NextPage    func(int)
 }
 
-func (m modelList) Init() tea.Cmd {
+func (m ModelList) Init() tea.Cmd {
 	return nil
 }
 
-func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m ModelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.list.SetWidth(msg.Width)
+		m.List.SetWidth(msg.Width)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -47,20 +47,19 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "enter":
-			i, ok := m.list.SelectedItem().(item)
+			i, ok := m.List.SelectedItem().(Item)
 			if ok {
-				if m.list.Title == mainTitle {
-					m.takenItemID = m.list.Index()
-					m.list = listModel(actionItems(string(i)))
+				if m.List.Title == mainTitle {
+					m.takenItemID = m.List.Index()
+					m.List = ListModel(actionItems(i.Title))
 				} else {
-					switch string(i) {
+					switch i.Title {
 					case AddItem:
-						m.nextPage(m.takenItemID)
-						return m, nil
+						m.NextPage(m.takenItemID * 2)
 					case ShowItem:
-
+						m.NextPage(m.takenItemID*2 + 1)
 					default:
-						m.list = listModel(mainItems())
+						m.List = ListModel(mainItems())
 					}
 				}
 			}
@@ -69,13 +68,13 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var cmd tea.Cmd
-	m.list, cmd = m.list.Update(msg)
+	m.List, cmd = m.List.Update(msg)
 	return m, cmd
 }
 
-func (m modelList) View() string {
+func (m ModelList) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("Ничего не нужно? Ну пока!")
 	}
-	return m.list.View()
+	return m.List.View()
 }
