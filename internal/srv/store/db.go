@@ -44,7 +44,7 @@ func (db *Storage) AddNewPair(ctx context.Context, userID int, pair model.PairIn
 	return err
 }
 
-func (db *Storage) GetPairs(ctx context.Context, userID int) ([]model.PairInfo, error) {
+func (db *Storage) GetPairs(ctx context.Context, userID int, limit int, offset int) ([]model.PairInfo, error) {
 	pairs := []model.PairInfo{}
 	rows, err := db.QueryContext(ctx, `SELECT
 				login,
@@ -52,8 +52,10 @@ func (db *Storage) GetPairs(ctx context.Context, userID int) ([]model.PairInfo, 
 				date,
 				meta
 			FROM pairs
-			WHERE user_id = @user_id ORDER BY date DESC`,
+			WHERE user_id = @user_id ORDER BY date DESC LIMIT @limit OFFSET @offset`,
 		sql.Named("user_id", userID),
+		sql.Named("limit", limit),
+		sql.Named("offset", offset),
 	)
 	if err != nil {
 		return pairs, err
