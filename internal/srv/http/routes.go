@@ -34,11 +34,6 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 	userLayer.HandleFunc("GET /login", h.Login)
 
 	apiRouter.Use(middleware.CheckAuth)
-	apiRouter.HandleFunc("GET /protected", func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Context().Value(model.UserIDCtxKey{}).(int)
-		w.Write([]byte(fmt.Sprintln(userID)))
-		w.WriteHeader(http.StatusOK)
-	})
 	apiRouter.HandleFunc("POST /item/add", h.AddItem)
 	apiRouter.HandleFunc("GET /item", h.GetItem)
 
