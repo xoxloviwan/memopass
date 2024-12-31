@@ -21,5 +21,5 @@ type Pair struct {
 
 type PairInfo struct {
 	Pair
-	Meta Metainfo `json:"meta"`
+	Metainfo `json:"meta"`
 }

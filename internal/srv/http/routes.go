@@ -2,10 +2,10 @@ package http
 
 import (
 	"fmt"
+	"iwakho/gopherkeep/internal/model"
 	"iwakho/gopherkeep/internal/srv/http/handlers"
 	"iwakho/gopherkeep/internal/srv/http/middleware"
 	"iwakho/gopherkeep/internal/srv/log"
-	"iwakho/gopherkeep/internal/model"
 	"net/http"
 
 	"github.com/go-pkgz/routegroup"
@@ -40,6 +40,7 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 		w.WriteHeader(http.StatusOK)
 	})
 	apiRouter.HandleFunc("POST /item/add", h.AddItem)
+	apiRouter.HandleFunc("GET /item", h.GetItem)
 
 	return router
 }

@@ -9,6 +9,7 @@ type Store interface {
 	NewUser(ctx context.Context, user model.User) (int, error)
 	GetUser(ctx context.Context, username string) (*model.User, error)
 	AddNewPair(ctx context.Context, userID int, pair model.PairInfo) error
+	GetPairs(ctx context.Context, userID int) ([]model.PairInfo, error)
 }
 
 type logger interface {

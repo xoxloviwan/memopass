@@ -40,6 +40,34 @@ func (db *Storage) GetUser(ctx context.Context, login string) (*model.User, erro
 }
 
 func (db *Storage) AddNewPair(ctx context.Context, userID int, pair model.PairInfo) error {
-	_, err := db.ExecContext(ctx, "INSERT INTO pairs (user_id, date, login, password, meta) VALUES ($1, $2, $3, $4, $5)", userID, pair.Meta.Date, pair.Login, pair.Password, pair.Meta.Text)
+	_, err := db.ExecContext(ctx, "INSERT INTO pairs (user_id, date, login, password, meta) VALUES ($1, $2, $3, $4, $5)", userID, pair.Date, pair.Login, pair.Password, pair.Text)
 	return err
+}
+
+func (db *Storage) GetPairs(ctx context.Context, userID int) ([]model.PairInfo, error) {
+	pairs := []model.PairInfo{}
+	rows, err := db.QueryContext(ctx, `SELECT
+				login,
+				password,
+				date,
+				meta
+			FROM pairs
+			WHERE user_id = @user_id ORDER BY date DESC`,
+		sql.Named("user_id", userID),
+	)
+	if err != nil {
+		return pairs, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		pair := model.PairInfo{}
+		err = rows.Scan(&pair.Login, &pair.Password, &pair.Date, &pair.Text)
+		if err != nil {
+			return pairs, err
+		}
+		pairs = append(pairs, pair)
+	}
+
+	return pairs, nil
 }

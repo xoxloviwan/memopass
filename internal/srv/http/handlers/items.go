@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"iwakho/gopherkeep/internal/model"
 	"net/http"
 	"strconv"
@@ -28,7 +29,7 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 				Login:    r.PostForm.Get("login"),
 				Password: r.PostForm.Get("password"),
 			},
-			Meta: model.Metainfo{
+			Metainfo: model.Metainfo{
 				Date: time.Now(),
 				Text: r.PostForm.Get("meta"),
 			},
@@ -45,6 +46,39 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 	// TODO: add binary item
 	case model.ItemTypeCard:
 	// TODO: add card item
+	default:
+		http.Error(w, "unknown item type", http.StatusBadRequest)
+	}
+}
+
+func (h *Handler) GetItem(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(model.UserIDCtxKey{}).(int)
+	itemTypeStr := r.URL.Query().Get("type")
+	itemType, err := strconv.Atoi(itemTypeStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	switch itemType {
+	case model.ItemTypeLoginPass:
+		pairs, err := h.store.GetPairs(r.Context(), userID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		resp, err := json.Marshal(pairs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(resp)
+	case model.ItemTypeText:
+	// TODO: add text item
+	case model.ItemTypeBinary:
+	// TODO: add binary item
+	case model.ItemTypeCard:
+		// TODO: add card item
 	default:
 		http.Error(w, "unknown item type", http.StatusBadRequest)
 	}
