@@ -2,7 +2,7 @@ package login
 
 import (
 	"fmt"
-	"iwakho/gopherkeep/internal/cli/views/form"
+	"iwakho/gopherkeep/internal/cli/views/basics/form"
 	"sort"
 	"strings"
 

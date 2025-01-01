@@ -2,7 +2,7 @@ package pair
 
 import (
 	ctrl "iwakho/gopherkeep/internal/cli/controls"
-	"iwakho/gopherkeep/internal/cli/views/form"
+	"iwakho/gopherkeep/internal/cli/views/basics/form"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

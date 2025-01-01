@@ -2,7 +2,7 @@ package login
 
 import (
 	ctrl "iwakho/gopherkeep/internal/cli/controls"
-	"iwakho/gopherkeep/internal/cli/views/form"
+	"iwakho/gopherkeep/internal/cli/views/basics/form"
 )
 
 func InitLogin(nextPage func()) modelForm {

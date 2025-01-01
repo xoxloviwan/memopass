@@ -3,7 +3,7 @@ package show
 import (
 	"fmt"
 	ctrl "iwakho/gopherkeep/internal/cli/controls"
-	"iwakho/gopherkeep/internal/cli/views/item"
+	"iwakho/gopherkeep/internal/cli/views/basics/item"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"

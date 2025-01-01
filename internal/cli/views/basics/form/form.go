@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	btn "iwakho/gopherkeep/internal/cli/views/button"
+	btn "iwakho/gopherkeep/internal/cli/views/basics/button"
 	"iwakho/gopherkeep/internal/model"
 
 	"github.com/charmbracelet/bubbles/cursor"
