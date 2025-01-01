@@ -33,7 +33,7 @@ func (d ItemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 		return
 	}
 
-	str := fmt.Sprintf("%d. %s", index+1, i.Title)
+	str := i.Title
 
 	if i.Description != "" {
 		str = str + fmt.Sprintf("\n %s", i.Description)
