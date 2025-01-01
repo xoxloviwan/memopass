@@ -1,8 +1,6 @@
 package http
 
 import (
-	"fmt"
-	"iwakho/gopherkeep/internal/model"
 	"iwakho/gopherkeep/internal/srv/http/handlers"
 	"iwakho/gopherkeep/internal/srv/http/middleware"
 	"iwakho/gopherkeep/internal/srv/log"

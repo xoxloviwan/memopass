@@ -27,7 +27,7 @@ type addPairPage struct {
 	height int
 }
 
-func NewPairPage(nextPage func()) *addPairPage {
+func NewPage(nextPage func()) *addPairPage {
 	return &addPairPage{InitPair(nextPage), 0, 0}
 }
 

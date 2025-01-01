@@ -51,7 +51,7 @@ type AuthPage struct {
 	height int
 }
 
-func NewAuthPage(onEnter func()) *AuthPage {
+func NewPage(onEnter func()) *AuthPage {
 	ap := AuthPage{
 		TabContent: []modelForm{
 			InitLogin(onEnter),

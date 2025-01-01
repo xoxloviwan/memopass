@@ -3,8 +3,8 @@ package views
 import (
 	addPair "iwakho/gopherkeep/internal/cli/views/items/pair/add"
 	showPairs "iwakho/gopherkeep/internal/cli/views/items/pair/show"
-	"iwakho/gopherkeep/internal/cli/views/list"
 	"iwakho/gopherkeep/internal/cli/views/login"
+	"iwakho/gopherkeep/internal/cli/views/menu"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -39,9 +39,9 @@ func NewApp() (App, error) {
 	app := App{pages: make([]Page, pageTotal)}
 
 	const offset = 2
-	app.pages[0] = login.NewAuthPage(nextPage(1))
+	app.pages[0] = login.NewPage(nextPage(1))
 
-	app.pages[1] = list.NewListPage(func(id int) {
+	app.pages[1] = menu.NewPage(func(id int) {
 		nextPage := id + offset
 		if nextPage < pageTotal {
 			currentPage = nextPage
@@ -49,8 +49,8 @@ func NewApp() (App, error) {
 			currentPage = 1
 		}
 	})
-	app.pages[offset+0] = addPair.NewPairPage(nextPage(1))
-	app.pages[offset+1] = showPairs.NewPairPage(nextPage(1))
+	app.pages[offset+0] = addPair.NewPage(nextPage(1))
+	app.pages[offset+1] = showPairs.NewPage(nextPage(1))
 	//app.pages[3] = pair.NewPairPage(nextPage(1))
 
 	return app, nil

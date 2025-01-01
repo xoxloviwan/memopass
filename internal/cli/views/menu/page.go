@@ -1,12 +1,14 @@
-package list
+package menu
 
 import (
+	"iwakho/gopherkeep/internal/cli/views/item"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type listPage struct {
-	Model  ModelList
+	Model  modelList
 	width  int
 	height int
 }
@@ -16,7 +18,7 @@ func (lp *listPage) Init(width, height int) {
 }
 func (lp *listPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 	model, cmd := lp.Model.Update(msg)
-	lp.Model = model.(ModelList)
+	lp.Model = model.(modelList)
 	return m, cmd
 }
 
@@ -45,10 +47,10 @@ const (
 func mainItems() BaseList {
 	return BaseList{
 		Items: []list.Item{
-			Item{Title: Pairs},
-			Item{Title: Notes},
-			Item{Title: Files},
-			Item{Title: Cards},
+			item.Item{Title: Pairs},
+			item.Item{Title: Notes},
+			item.Item{Title: Files},
+			item.Item{Title: Cards},
 		},
 		Title: mainTitle,
 	}
@@ -57,18 +59,18 @@ func mainItems() BaseList {
 func actionItems(title string) BaseList {
 	return BaseList{
 		Items: []list.Item{
-			Item{Title: AddItem},
-			Item{Title: ShowItem},
-			Item{Title: backAction},
+			item.Item{Title: AddItem},
+			item.Item{Title: ShowItem},
+			item.Item{Title: backAction},
 		},
 		Title: title,
 	}
 }
 
-func ListModel(lst BaseList) list.Model {
+func listModel(lst BaseList) list.Model {
 	const defaultWidth = 20
 
-	l := list.New(lst.Items, itemDelegate{}, defaultWidth, listHeight)
+	l := list.New(lst.Items, item.ItemDelegate{}, defaultWidth, listHeight)
 	l.Title = lst.Title
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
@@ -77,7 +79,7 @@ func ListModel(lst BaseList) list.Model {
 	return l
 }
 
-func NewListPage(nextPage func(int)) *listPage {
-	l := ListModel(mainItems())
-	return &listPage{ModelList{List: l, NextPage: nextPage}, 0, 0}
+func NewPage(nextPage func(int)) *listPage {
+	l := listModel(mainItems())
+	return &listPage{modelList{list: l, nextPage: nextPage}, 0, 0}
 }
