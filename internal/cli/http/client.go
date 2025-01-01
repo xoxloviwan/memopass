@@ -12,6 +12,7 @@ var (
 	ApiLogin   string
 	ApiSignUp  string
 	ApiAddItem string
+	ApiGetItem string
 )
 
 func InitClient(certPath string, baseURL string) error {
@@ -19,6 +20,7 @@ func InitClient(certPath string, baseURL string) error {
 	ApiLogin = apiURL + "/user/login"
 	ApiSignUp = apiURL + "/user/signup"
 	ApiAddItem = apiURL + "/item/add"
+	ApiGetItem = apiURL + "/item"
 	if certPath == "" {
 		Client = http.Client{}
 		return nil
