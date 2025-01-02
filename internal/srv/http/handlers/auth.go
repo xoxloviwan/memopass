@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"iwakho/gopherkeep/internal/srv/jwt"
 	"iwakho/gopherkeep/internal/model"
+	"iwakho/gopherkeep/internal/srv/jwt"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -23,6 +23,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	if !ok || err != nil {
 		w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
+		h.logger.Error("Auth error", "error", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}

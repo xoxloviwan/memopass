@@ -8,7 +8,8 @@ import (
 	"time"
 )
 
-const maxMemory = 32 << 20 // 32 MB
+const maxMemory = 5 << 20    // 5 MB
+const maxFileSize = 10 << 20 // 10 MB
 
 func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(model.UserIDCtxKey{}).(int)
@@ -43,7 +44,28 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 	case model.ItemTypeText:
 	// TODO: add text item
 	case model.ItemTypeBinary:
-	// TODO: add binary item
+		fhs := r.MultipartForm.File["file"]
+		if len(fhs) == 0 {
+			http.Error(w, "no file provided", http.StatusBadRequest)
+			return
+		}
+		f0 := fhs[0]
+		if f0.Size > maxFileSize {
+			http.Error(w, "file too large", http.StatusBadRequest)
+			return
+		}
+		file, err := f0.Open()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+		err = h.store.AddFile(r.Context(), userID, file, f0)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	case model.ItemTypeCard:
 	// TODO: add card item
 	default:

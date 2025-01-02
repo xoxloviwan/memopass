@@ -3,9 +3,15 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
+	"io"
 	"iwakho/gopherkeep/internal/model"
+	"mime/multipart"
+	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	drv "github.com/ncruces/go-sqlite3/driver"
+	_ "github.com/ncruces/go-sqlite3/embed"
 )
 
 type Storage struct {
@@ -72,4 +78,37 @@ func (db *Storage) GetPairs(ctx context.Context, userID int, limit int, offset i
 	}
 
 	return pairs, nil
+}
+
+func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader) error {
+	conn, err := db.Conn(ctx)
+	if err != nil {
+		return err
+	}
+	return conn.Raw(func(driverConn any) error {
+		conn, ok := driverConn.(drv.Conn)
+		if !ok {
+			return errors.New("not driver.Conn")
+		}
+		db := conn.Raw()
+		defer db.Close()
+		db.SetInterrupt(ctx)
+
+		err = db.Exec(fmt.Sprintf(`INSERT INTO files (user_id, date, name, file) VALUES ('%d', '%s', '%s', zeroblob(%d))`, userID, time.Now(), fh.Filename, fh.Size))
+		if err != nil {
+			return err
+		}
+		blob, err := db.OpenBlob("main", "files", "file", db.LastInsertRowID(), true)
+		if err != nil {
+			return err
+		}
+		defer blob.Close()
+		n, err := io.Copy(blob, file)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("written %d\n", n)
+
+		return nil
+	})
 }
