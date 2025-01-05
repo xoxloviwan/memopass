@@ -18,12 +18,14 @@ func Logging(logger logger) middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			reqID := uuid.New().String()
+			w.Header().Set("X-Request-ID", reqID)
 			logger.Info(
 				"REQ",
 				slog.String("method", r.Method),
 				slog.String("uri", r.URL.String()),
 				slog.String("request_id", reqID),
 				slog.String("ip", r.RemoteAddr),
+				slog.String("size", r.Header.Get("Content-Length")),
 				slog.String("user_agent", r.Header.Get("User-Agent")),
 			)
 

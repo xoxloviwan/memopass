@@ -5,6 +5,7 @@ import (
 	"io"
 	"iwakho/gopherkeep/internal/model"
 	"mime/multipart"
+	"net/http"
 )
 
 type Store interface {
@@ -30,4 +31,9 @@ func NewHandler(store Store, logger logger) *Handler {
 		store,
 		logger,
 	}
+}
+
+func (h Handler) ErrorWithLog(w http.ResponseWriter, err string, code int) {
+	h.logger.Error(err, "request_id", w.Header().Get("X-Request-ID"))
+	http.Error(w, err, code)
 }

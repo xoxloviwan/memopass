@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io"
 	"iwakho/gopherkeep/internal/model"
 	"iwakho/gopherkeep/internal/srv/jwt"
@@ -23,13 +23,13 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	if !ok || err != nil {
 		w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
-		h.logger.Error("Auth error", "error", err)
+		h.logger.Error("Auth error", "error", err, "request_id", w.Header().Get("X-Request-ID"))
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 	err = addAuthData(*u, w)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -48,7 +48,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		err = json.Unmarshal(data, &creds)
 		if err == nil {
 			if creds.User == "" || creds.Pwd == "" {
-				err = fmt.Errorf("empty login or password")
+				err = errors.New("empty login or password")
 			}
 			if err == nil {
 				user.Name = creds.User
@@ -57,17 +57,17 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		h.ErrorWithLog(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	user.ID, err = h.store.NewUser(r.Context(), user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusConflict)
+		h.ErrorWithLog(w, err.Error(), http.StatusConflict)
 		return
 	}
 	err = addAuthData(user, w)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
