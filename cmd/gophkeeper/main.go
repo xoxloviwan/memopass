@@ -42,7 +42,10 @@ func init() {
 func main() {
 	m, err := views.NewApp()
 	fatal(err)
-	_, err = tea.NewProgram(m).Run()
+	p := tea.NewProgram(m, func(pp *tea.Program) {
+		m.Sender = pp
+	})
+	_, err = p.Run()
 	fatal(err)
 }
 

@@ -1,6 +1,7 @@
 package views
 
 import (
+	"iwakho/gopherkeep/internal/cli/views/items/file/picker"
 	addPair "iwakho/gopherkeep/internal/cli/views/items/pair/add"
 	showPairs "iwakho/gopherkeep/internal/cli/views/items/pair/show"
 	"iwakho/gopherkeep/internal/cli/views/login"
@@ -15,7 +16,7 @@ var (
 	ready bool
 )
 
-const pageTotal = 4
+const pageTotal = 7
 
 var currentPage = 0
 
@@ -25,8 +26,13 @@ type Page interface {
 	View() string
 }
 
+type Sender interface {
+	Send(tea.Msg)
+}
+
 type App struct {
 	pages []Page
+	Sender
 }
 
 func nextPage(id int) func() {
@@ -35,7 +41,8 @@ func nextPage(id int) func() {
 	}
 }
 
-func NewApp() (App, error) {
+func NewApp() (*App, error) {
+	firstPass := true
 	app := App{pages: make([]Page, pageTotal)}
 
 	const offset = 2
@@ -48,12 +55,17 @@ func NewApp() (App, error) {
 		} else {
 			currentPage = 1
 		}
+		// fix first refresh for file picker
+		if id == 4 && app.Sender != nil && firstPass {
+			firstPass = false
+			go app.Sender.Send(tea.KeyMsg{Type: tea.KeyEnter})
+		}
 	})
 	app.pages[offset+0] = addPair.NewPage(nextPage(1))
 	app.pages[offset+1] = showPairs.NewPage(nextPage(1))
-	//app.pages[3] = pair.NewPairPage(nextPage(1))
+	app.pages[offset+4] = picker.NewPage(nextPage(1))
 
-	return app, nil
+	return &app, nil
 }
 
 func (s App) Init() tea.Cmd {
@@ -66,7 +78,9 @@ func (s App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !ready {
 			ready = true
 			for _, p := range s.pages {
-				p.Init(msg.Width, msg.Height)
+				if p != nil {
+					p.Init(msg.Width, msg.Height)
+				}
 			}
 		}
 	}
