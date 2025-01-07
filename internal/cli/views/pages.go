@@ -42,7 +42,6 @@ func nextPage(id int) func() {
 }
 
 func NewApp() (*App, error) {
-	firstPass := true
 	app := App{pages: make([]Page, pageTotal)}
 
 	const offset = 2
@@ -55,10 +54,9 @@ func NewApp() (*App, error) {
 		} else {
 			currentPage = 1
 		}
-		// fix first refresh for file picker
-		if id == 4 && app.Sender != nil && firstPass {
-			firstPass = false
-			go app.Sender.Send(tea.KeyMsg{Type: tea.KeyEnter})
+		// fix refresh for file picker
+		if id == 4 && app.Sender != nil {
+			go app.Sender.Send(new(tea.Msg))
 		}
 	})
 	app.pages[offset+0] = addPair.NewPage(nextPage(1))
