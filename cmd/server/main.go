@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"fmt"
 	iHttp "iwakho/gopherkeep/internal/srv/http"
@@ -9,6 +11,9 @@ import (
 	"iwakho/gopherkeep/internal/srv/store"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 const (
@@ -66,10 +71,36 @@ func main() {
 		Addr:    *address,
 		Handler: mux,
 	}
+
+	// Через этот канал сообщим основному потоку, что соединения закрыты.
+	idleConnsClosed := make(chan struct{})
+	// Создаем канал для сигналов завершения.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		// читаем из канала прерываний
+		// поскольку нужно прочитать только одно прерывание,
+		// можно обойтись без цикла
+		<-quit
+		signal.Stop(quit)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		logger.Info("Shutdown Server...")
+		if err := srv.Shutdown(ctx); err != nil {
+			// ошибки закрытия Listener
+			logger.Error("Server shutdown error", "error", err)
+		}
+		// сообщаем основному потоку,
+		// что все сетевые соединения обработаны и закрыты
+		close(idleConnsClosed)
+	}()
+
 	logger.Info("Starting server", "addr", srv.Addr)
 	err = srv.ListenAndServeTLS(defaultCertPath, defaultKeyPath)
-	if err != nil {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("Server error", "error", err)
 		os.Exit(1)
 	}
+	<-idleConnsClosed
+	logger.Info("Server stopped")
 }
