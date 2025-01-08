@@ -2,9 +2,7 @@ package picker
 
 import (
 	"errors"
-	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -25,10 +23,6 @@ type modelPicker struct {
 	err          error
 	nextPage     func()
 	is1stUpdate  bool
-	renderCnt    int
-	updateCnt    int
-	updates      []tea.Msg
-	stack        []byte
 	control      fileSender
 }
 
@@ -54,11 +48,6 @@ func clearErrorAfter(t time.Duration) tea.Cmd {
 	})
 }
 
-type ReadDirMsg struct {
-	id      int
-	entries []os.DirEntry
-}
-
 func (m modelPicker) Init() tea.Cmd {
 	return m.filepicker.Init()
 }
@@ -68,8 +57,6 @@ func (m modelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.is1stUpdate = false
 		return m, m.Init()
 	}
-	m.updateCnt++
-	m.updates = append(m.updates, msg)
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -116,21 +103,17 @@ func (m modelPicker) View() string {
 	if m.quitting {
 		return ""
 	}
-	m.renderCnt++
 	var s strings.Builder
 	s.WriteString("Выберите файл:\n  ")
-	// s.WriteString("Stack:" + string(m.stack))
 	if m.err != nil {
 		s.WriteString(m.filepicker.Styles.DisabledFile.Render(m.err.Error()))
 	} else if m.selectedFile == "" {
 		s.WriteString("" + m.filepicker.CurrentDirectory)
 	} else {
-		s.WriteString("Selected file: " + m.filepicker.Styles.Selected.Render(m.selectedFile))
+		s.WriteString("Выбран файл: " + m.filepicker.Styles.Selected.Render(m.selectedFile))
 	}
 
 	view := m.filepicker.View()
 	s.WriteString("\n\n" + view + "\n")
-
-	s.WriteString("renders: " + strconv.Itoa(m.renderCnt) + " updates: " + strconv.Itoa(m.updateCnt) + " []updates:" + fmt.Sprintf("%v", m.updates)) // debug
 	return s.String()
 }

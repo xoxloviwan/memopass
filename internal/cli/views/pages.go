@@ -54,8 +54,8 @@ func NewApp() (*App, error) {
 		} else {
 			currentPage = 1
 		}
-		// fix refresh for file picker
-		if id == 4 && app.Sender != nil {
+		// fix refresh for list and file picker
+		if (id == 1 || id == 4) && app.Sender != nil {
 			go app.Sender.Send(new(tea.Msg))
 		}
 	})
