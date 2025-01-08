@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"time"
 
+	"github.com/ncruces/go-sqlite3"
 	drv "github.com/ncruces/go-sqlite3/driver"
 	_ "github.com/ncruces/go-sqlite3/embed"
 )
@@ -92,12 +93,48 @@ func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *
 		}
 		db := conn.Raw()
 		defer db.Close()
-		db.SetInterrupt(ctx)
+		old := db.SetInterrupt(ctx)
+		defer db.SetInterrupt(old)
 
-		err = db.Exec(fmt.Sprintf(`INSERT INTO files (user_id, date, name, file) VALUES ('%d', '%s', '%s', zeroblob(%d))`, userID, time.Now(), fh.Filename, fh.Size))
+		const (
+			prefix  = "@"
+			userTag = "user_id"
+			dateTag = "date"
+			nameTag = "name"
+			sizeTag = "size"
+			fileTag = "file"
+		)
+		query := fmt.Sprintf(`INSERT INTO files (%s, %s, %s, %s) VALUES (%s, %s, %s, zeroblob(%s))`,
+			userTag, dateTag, nameTag, fileTag, prefix+userTag, prefix+dateTag, prefix+nameTag, prefix+sizeTag)
+
+		stmt, _, err := db.Prepare(query)
 		if err != nil {
 			return err
 		}
+
+		err = stmt.BindInt(stmt.BindIndex(prefix+userTag), userID)
+		if err != nil {
+			return err
+		}
+		err = stmt.BindTime(stmt.BindIndex(prefix+dateTag), time.Now(), sqlite3.TimeFormatDefault)
+		if err != nil {
+			return err
+		}
+		err = stmt.BindText(stmt.BindIndex(prefix+nameTag), fh.Filename)
+		if err != nil {
+			return err
+		}
+		err = stmt.BindInt64(stmt.BindIndex(prefix+sizeTag), fh.Size)
+		if err != nil {
+			return err
+		}
+
+		err = stmt.Exec()
+		stmt.ClearBindings()
+		if err != nil {
+			return err
+		}
+
 		blob, err := db.OpenBlob("main", "files", "file", db.LastInsertRowID(), true)
 		if err != nil {
 			return err
