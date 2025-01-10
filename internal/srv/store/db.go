@@ -149,3 +149,35 @@ func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *
 		return nil
 	})
 }
+
+func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset int) ([]model.FileInfo, error) {
+	files := []model.FileInfo{}
+	rows, err := db.QueryContext(ctx, `SELECT
+				name,
+				file,
+				date,
+				meta
+			FROM files
+			WHERE user_id = @user_id ORDER BY date DESC LIMIT @limit OFFSET @offset`,
+		sql.Named("user_id", userID),
+		sql.Named("limit", limit),
+		sql.Named("offset", offset),
+	)
+	if err != nil {
+		return files, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		file := model.FileInfo{}
+		var meta sql.NullString
+		err = rows.Scan(&file.Name, &file.Blob, &file.Date, &meta)
+		if err != nil {
+			return files, err
+		}
+		if meta.Valid {
+			file.Text = meta.String
+		}
+		files = append(files, file)
+	}
+	return files, nil
+}

@@ -33,7 +33,7 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 
 	apiRouter.Use(middleware.CheckAuth)
 	apiRouter.HandleFunc("POST /item/add", h.AddItem)
-	apiRouter.HandleFunc("GET /item", h.GetItem)
+	apiRouter.HandleFunc("GET /item", h.GetItems)
 
 	return router
 }

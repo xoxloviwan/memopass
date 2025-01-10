@@ -13,6 +13,7 @@ type Store interface {
 	GetUser(ctx context.Context, username string) (*model.User, error)
 	AddNewPair(ctx context.Context, userID int, pair model.PairInfo) error
 	GetPairs(ctx context.Context, userID int, limit int, offset int) ([]model.PairInfo, error)
+	GetFiles(ctx context.Context, userID int, limit int, offset int) ([]model.FileInfo, error)
 	AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader) error
 }
 

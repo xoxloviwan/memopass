@@ -77,7 +77,7 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) GetItem(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetItems(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(model.UserIDCtxKey{}).(int)
 	queries := r.URL.Query()
 	itemTypeStr := queries.Get("type")
@@ -121,7 +121,18 @@ func (h *Handler) GetItem(w http.ResponseWriter, r *http.Request) {
 	case model.ItemTypeText:
 	// TODO: add text item
 	case model.ItemTypeBinary:
-	// TODO: add binary item
+		files, err := h.store.GetFiles(r.Context(), userID, limit, offset)
+		if err != nil {
+			h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		resp, err := json.Marshal(files)
+		if err != nil {
+			h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(resp)
 	case model.ItemTypeCard:
 		// TODO: add card item
 	default:

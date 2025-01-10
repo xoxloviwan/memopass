@@ -23,3 +23,13 @@ type PairInfo struct {
 	Pair
 	Metainfo `json:"meta"`
 }
+
+type File struct {
+	Name string `json:"name"`
+	Blob []byte `json:"blob"`
+}
+
+type FileInfo struct {
+	File
+	Metainfo `json:"meta"`
+}
