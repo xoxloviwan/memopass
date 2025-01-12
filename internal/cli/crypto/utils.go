@@ -12,7 +12,7 @@ type CryptoManager struct {
 	key []byte
 }
 
-func newCryptoManager(p model.Pair) *CryptoManager {
+func NewCryptoManager(p model.Pair) *CryptoManager {
 	checksum := sha256.Sum256([]byte(p.Login + p.Password))
 	return &CryptoManager{key: checksum[:]}
 }

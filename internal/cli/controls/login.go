@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"iwakho/gopherkeep/internal/cli/crypto"
 	iHttp "iwakho/gopherkeep/internal/cli/http"
 	"iwakho/gopherkeep/internal/model"
 	"net/http"
 )
 
 var (
-	token string
+	token    string
+	CrptMngr *crypto.CryptoManager
 )
 
 type LoginCtrl struct{}
@@ -33,6 +35,7 @@ func (LoginCtrl) Submit(p model.Pair) error {
 	if token == "" {
 		return fmt.Errorf("Bad token")
 	}
+	CrptMngr = crypto.NewCryptoManager(p)
 	return nil
 }
 
@@ -64,5 +67,6 @@ func (SignUpCtrl) Submit(p model.Pair) error {
 	if token == "" {
 		return fmt.Errorf("Bad token")
 	}
+	CrptMngr = crypto.NewCryptoManager(p)
 	return nil
 }

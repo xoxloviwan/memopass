@@ -10,7 +10,7 @@ func TestCryptoManager(t *testing.T) {
 		Login:    "alice",
 		Password: "12345",
 	}
-	cm := newCryptoManager(p)
+	cm := NewCryptoManager(p)
 	sample := "Шифрование очень длинного сообщения, которое будет зашифровано, а затем расшифровано, чтобы проверить, что шифрование работает правильно."
 
 	encrypted, err := cm.Encrypt(sample)
