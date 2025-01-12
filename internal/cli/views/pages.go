@@ -1,6 +1,7 @@
 package views
 
 import (
+	"iwakho/gopherkeep/internal/cli/views/items/creditcard"
 	"iwakho/gopherkeep/internal/cli/views/items/file/picker"
 	addPair "iwakho/gopherkeep/internal/cli/views/items/pair/add"
 	showPairs "iwakho/gopherkeep/internal/cli/views/items/pair/show"
@@ -16,7 +17,7 @@ var (
 	ready bool
 )
 
-const pageTotal = 7
+const pageTotal = 9
 
 var currentPage = 0
 
@@ -62,6 +63,7 @@ func NewApp() (*App, error) {
 	app.pages[offset+0] = addPair.NewPage(nextPage(1))
 	app.pages[offset+1] = showPairs.NewPage(nextPage(1))
 	app.pages[offset+4] = picker.NewPage(nextPage(1))
+	app.pages[offset+6] = creditcard.NewPage(nextPage(1))
 
 	return &app, nil
 }
