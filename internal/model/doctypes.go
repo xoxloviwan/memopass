@@ -33,3 +33,14 @@ type FileInfo struct {
 	File
 	Metainfo `json:"meta"`
 }
+
+type Card struct {
+	Number   string `json:"ccn"`
+	Exp      string `json:"exp"`
+	VerifVal string `json:"cvv"`
+}
+
+type CardInfo struct {
+	Card
+	Metainfo `json:"meta"`
+}

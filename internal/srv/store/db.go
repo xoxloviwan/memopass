@@ -181,3 +181,8 @@ func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset i
 	}
 	return files, nil
 }
+
+func (db *Storage) AddCard(ctx context.Context, userID int, card model.CardInfo) error {
+	_, err := db.ExecContext(ctx, "INSERT INTO cards (user_id, ccn, exp, cvv, date, meta) VALUES ($1, $2, $3, $4, $5, $6)", userID, card.Number, card.Exp, card.VerifVal, card.Date, card.Text)
+	return err
+}

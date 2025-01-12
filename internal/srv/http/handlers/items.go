@@ -71,7 +71,23 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK)
 	case model.ItemTypeCard:
-	// TODO: add card item
+		card := model.CardInfo{
+			Card: model.Card{
+				Number:   r.PostForm.Get("ccn"),
+				Exp:      r.PostForm.Get("exp"),
+				VerifVal: r.PostForm.Get("cvv"),
+			},
+			Metainfo: model.Metainfo{
+				Date: time.Now(),
+				Text: r.PostForm.Get("meta"),
+			},
+		}
+		err := h.store.AddCard(r.Context(), userID, card)
+		if err != nil {
+			h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	default:
 		h.ErrorWithLog(w, "unknown item type", http.StatusBadRequest)
 	}

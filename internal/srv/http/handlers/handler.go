@@ -15,6 +15,7 @@ type Store interface {
 	GetPairs(ctx context.Context, userID int, limit int, offset int) ([]model.PairInfo, error)
 	GetFiles(ctx context.Context, userID int, limit int, offset int) ([]model.FileInfo, error)
 	AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader) error
+	AddCard(ctx context.Context, userID int, card model.CardInfo) error
 }
 
 type logger interface {
