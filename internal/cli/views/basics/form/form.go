@@ -22,9 +22,7 @@ var (
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 )
 
-type Control interface {
-	Submit(p model.Pair) error
-}
+type submitFunc func(model.Pair) error
 
 type ModelForm struct {
 	Name        string
@@ -36,7 +34,11 @@ type ModelForm struct {
 	indexMax    int
 	failMessage string
 	isUpdated   bool
-	Control
+	submitCall  submitFunc
+}
+
+func (m *ModelForm) Submit(p model.Pair) error {
+	return m.submitCall(p)
 }
 
 type FormCaller struct {
@@ -45,10 +47,11 @@ type FormCaller struct {
 	ButtonNames []string
 }
 
-func InitForm(fc *FormCaller) *ModelForm {
+func InitForm(fc *FormCaller, submitCall submitFunc) *ModelForm {
 	m := ModelForm{
-		Name:   fc.FormName,
-		inputs: make([]textinput.Model, len(fc.InputNames)),
+		Name:       fc.FormName,
+		inputs:     make([]textinput.Model, len(fc.InputNames)),
+		submitCall: submitCall,
 	}
 	m.buttons = fc.ButtonNames
 	var t textinput.Model

@@ -2,6 +2,7 @@ package show
 
 import (
 	"iwakho/gopherkeep/internal/cli/views/basics/item"
+	"iwakho/gopherkeep/internal/model"
 
 	"github.com/charmbracelet/bubbles/list"
 
@@ -27,14 +28,22 @@ func listModel() list.Model {
 	return l
 }
 
+type client interface {
+	GetPairs(int, int) ([]model.PairInfo, error)
+}
+
 type pairPage struct {
 	Model  modelList
 	width  int
 	height int
 }
 
-func NewPage(nextPage func()) *pairPage {
-	return &pairPage{modelList{list: listModel(), nextPage: nextPage}, 0, 0}
+func NewPage(nextPage func(), client client) *pairPage {
+	return &pairPage{modelList{
+		list:     listModel(),
+		nextPage: nextPage,
+		client:   client,
+	}, 0, 0}
 }
 
 func (pp *pairPage) Init(width, height int) {

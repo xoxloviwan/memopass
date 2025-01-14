@@ -2,17 +2,23 @@ package show
 
 import (
 	"fmt"
-	ctrl "iwakho/gopherkeep/internal/cli/controls"
+
 	"iwakho/gopherkeep/internal/cli/views/basics/item"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func pairsItems() []list.Item {
+type modelList struct {
+	list     list.Model
+	ready    bool
+	nextPage func()
+	client
+}
+
+func (m modelList) pairsItems() []list.Item {
 	items := []list.Item{}
-	show := ctrl.ShowCtrl{}
-	pairs, err := show.GetPairs(10, 0)
+	pairs, err := m.GetPairs(10, 0)
 	if err != nil {
 		return []list.Item{item.Item{Title: "Ошибка", Description: err.Error()}}
 	}
@@ -27,19 +33,13 @@ func pairsItems() []list.Item {
 	return items
 }
 
-type modelList struct {
-	list     list.Model
-	ready    bool
-	nextPage func()
-}
-
 func (m modelList) Init() tea.Cmd {
-	return m.list.SetItems(pairsItems())
+	return m.list.SetItems(m.pairsItems())
 }
 
 func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if !m.ready {
-		cmd := m.list.SetItems(pairsItems())
+		cmd := m.list.SetItems(m.pairsItems())
 		m.ready = true
 		return m, cmd
 	}

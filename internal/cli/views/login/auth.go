@@ -3,6 +3,7 @@ package login
 import (
 	"fmt"
 	"iwakho/gopherkeep/internal/cli/views/basics/form"
+	"iwakho/gopherkeep/internal/model"
 	"sort"
 	"strings"
 
@@ -51,11 +52,16 @@ type AuthPage struct {
 	height int
 }
 
-func NewPage(onEnter func()) *AuthPage {
+type Client interface {
+	Login(p model.Pair) error
+	SignUp(p model.Pair) error
+}
+
+func NewPage(onEnter func(), client Client) *AuthPage {
 	ap := AuthPage{
 		TabContent: []modelForm{
-			InitLogin(onEnter),
-			InitSignUp(onEnter),
+			InitLogin(onEnter, client),
+			InitSignUp(onEnter, client),
 		},
 		Tabs: make(map[int]Tab),
 	}

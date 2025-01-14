@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"iwakho/gopherkeep/internal/cli/config"
 	iHttp "iwakho/gopherkeep/internal/cli/http"
 	"iwakho/gopherkeep/internal/cli/views"
 	"os"
@@ -11,14 +12,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-const defaultAddress = "https://localhost"
-
 var (
 	buildVersion = "N/A"
 	buildDate    = "N/A"
 	buildCommit  = "N/A"
 	vers         = flag.Bool("v", false, "version")
-	address      = flag.String("a", defaultAddress, "server address")
 )
 
 func init() {
@@ -30,17 +28,13 @@ func init() {
 		fmt.Printf("Build version: %s\nBuild date: %s\nBuild commit: %s\n", buildVersion, buildDate, buildCommit)
 		os.Exit(0)
 	}
-	rootCApath, _ := os.LookupEnv("ROOTCA_PATH")
-	if address == nil {
-		address = new(string)
-		*address = defaultAddress
-	}
-	err := iHttp.InitClient(rootCApath, *address)
-	fatal(err)
 }
 
 func main() {
-	m, err := views.NewApp()
+	cfg := config.InitConfig(buildVersion)
+	cli, err := iHttp.InitClient(cfg.RootCApath, cfg.Address)
+	fatal(err)
+	m, err := views.NewApp(cli)
 	fatal(err)
 	p := tea.NewProgram(m, func(pp *tea.Program) {
 		m.Sender = pp

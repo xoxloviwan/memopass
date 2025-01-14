@@ -1,8 +1,9 @@
 package creditcard
 
 import (
+	"errors"
 	"fmt"
-	"runtime/debug"
+	"iwakho/gopherkeep/internal/model"
 	"strconv"
 	"strings"
 
@@ -31,17 +32,20 @@ var (
 	continueStyle = lipgloss.NewStyle().Foreground(darkGray)
 )
 
+type Control interface {
+	AddCard(p model.Card) error
+}
+
 type modelCard struct {
 	inputs   []textinput.Model
 	focused  int
 	err      error
 	nextPage func()
-	stack    []byte
+	control  Control
 }
 
 // Validator functions to ensure valid input
 func ccnValidator(s string) error {
-	debug.Stack()
 	// Credit Card Number should a string less than 20 digits
 	// It should include 16 integers and 3 spaces
 	if len(s) > 16+3 {
@@ -90,7 +94,7 @@ func cvvValidator(s string) error {
 	return err
 }
 
-func newModelCard(nextPage func()) modelCard {
+func newModelCard(nextPage func(), client Control) modelCard {
 	var inputs []textinput.Model = make([]textinput.Model, 3)
 	inputs[ccn] = textinput.New()
 	inputs[ccn].Placeholder = "4505 **** **** 1234"
@@ -117,8 +121,9 @@ func newModelCard(nextPage func()) modelCard {
 	return modelCard{
 		inputs:   inputs,
 		focused:  0,
-		err:      nil,
+		err:      errors.New("not filled"),
 		nextPage: nextPage,
+		control:  client,
 	}
 }
 
@@ -131,13 +136,22 @@ func (m modelCard) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		curFocus := m.focused
 		switch msg.Type {
 		case tea.KeyEnter:
-			if m.focused == len(m.inputs)-1 {
-				return m, tea.Quit
+			if err := m.inputs[m.focused].Validate(m.inputs[m.focused].Value()); err != nil { // TODO fix this check
+				m.nextInput()
+				break
 			}
-			m.nextInput()
+			err := m.control.AddCard(model.Card{
+				Number:   m.inputs[ccn].Value(),
+				Exp:      m.inputs[exp].Value(),
+				VerifVal: m.inputs[cvv].Value(),
+			})
+			if err != nil {
+				return m, nil
+			}
+			m.nextPage()
+			return m, nil
 		case tea.KeyCtrlC, tea.KeyEsc:
 			return m, tea.Quit
 		case tea.KeyShiftTab, tea.KeyCtrlP:
@@ -155,14 +169,10 @@ func (m modelCard) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		}
-		if m.inputs[curFocus].Err != nil {
-			m.focused = curFocus
-		} else {
-			for i := range m.inputs {
-				m.inputs[i].Blur()
-			}
-			m.inputs[m.focused].Focus()
+		for i := range m.inputs {
+			m.inputs[i].Blur()
 		}
+		m.inputs[m.focused].Focus()
 	}
 	return m, tea.Batch(cmds...)
 }

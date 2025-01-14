@@ -1,6 +1,7 @@
 package views
 
 import (
+	iHttp "iwakho/gopherkeep/internal/cli/http"
 	"iwakho/gopherkeep/internal/cli/views/items/creditcard"
 	"iwakho/gopherkeep/internal/cli/views/items/file/picker"
 	addPair "iwakho/gopherkeep/internal/cli/views/items/pair/add"
@@ -17,7 +18,7 @@ var (
 	ready bool
 )
 
-const pageTotal = 9
+const pageTotal = 10
 
 var currentPage = 0
 
@@ -34,6 +35,7 @@ type Sender interface {
 type App struct {
 	pages []Page
 	Sender
+	*iHttp.Client
 }
 
 func nextPage(id int) func() {
@@ -42,11 +44,14 @@ func nextPage(id int) func() {
 	}
 }
 
-func NewApp() (*App, error) {
-	app := App{pages: make([]Page, pageTotal)}
+func NewApp(client *iHttp.Client) (*App, error) {
+	app := App{
+		pages:  make([]Page, pageTotal),
+		Client: client,
+	}
 
 	const offset = 2
-	app.pages[0] = login.NewPage(nextPage(1))
+	app.pages[0] = login.NewPage(nextPage(1), app.Client)
 
 	app.pages[1] = menu.NewPage(func(id int) {
 		nextPage := id + offset
@@ -60,10 +65,14 @@ func NewApp() (*App, error) {
 			go app.Sender.Send(new(tea.Msg))
 		}
 	})
-	app.pages[offset+0] = addPair.NewPage(nextPage(1))
-	app.pages[offset+1] = showPairs.NewPage(nextPage(1))
-	app.pages[offset+4] = picker.NewPage(nextPage(1))
-	app.pages[offset+6] = creditcard.NewPage(nextPage(1))
+	app.pages[offset+0] = addPair.NewPage(nextPage(1), app.Client)
+	app.pages[offset+1] = showPairs.NewPage(nextPage(1), app.Client)
+	app.pages[offset+2] = app.pages[1] // TODO text editor
+	app.pages[offset+3] = app.pages[1] // TODO text viewer
+	app.pages[offset+4] = picker.NewPage(nextPage(1), app.Client)
+	app.pages[offset+5] = app.pages[1] // TODO file download
+	app.pages[offset+6] = creditcard.NewPage(nextPage(1), app.Client)
+	app.pages[offset+7] = app.pages[1] // TODO credit card list view
 
 	return &app, nil
 }

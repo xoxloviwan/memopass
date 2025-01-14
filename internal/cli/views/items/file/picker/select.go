@@ -6,14 +6,12 @@ import (
 	"strings"
 	"time"
 
-	ctrl "iwakho/gopherkeep/internal/cli/controls"
-
 	"github.com/charmbracelet/bubbles/filepicker"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type fileSender interface {
-	Submit(string) error
+	AddFile(string) error
 }
 
 type modelPicker struct {
@@ -26,7 +24,7 @@ type modelPicker struct {
 	control      fileSender
 }
 
-func newModelPicker(nextPage func()) modelPicker {
+func newModelPicker(nextPage func(), client fileSender) modelPicker {
 	fp := filepicker.New()
 	fp.ShowHidden = true
 	fp.AutoHeight = true
@@ -36,7 +34,7 @@ func newModelPicker(nextPage func()) modelPicker {
 		filepicker:  fp,
 		nextPage:    nextPage,
 		is1stUpdate: true,
-		control:     new(ctrl.AddFileCtrl),
+		control:     client,
 	}
 }
 
@@ -87,7 +85,7 @@ func (m modelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	if m.selectedFile != "" {
-		err := m.control.Submit(m.selectedFile)
+		err := m.control.AddFile(m.selectedFile)
 		if err != nil {
 			m.err = err
 			return m, tea.Batch(cmd, clearErrorAfter(2*time.Second))
