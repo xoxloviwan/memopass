@@ -1,0 +1,75 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  VERSION: v1.0.0
+  COMMIT: 
+    sh: git rev-parse --short HEAD
+  LDFLAGS: "-X main.buildVersion={{.VERSION}} -X main.buildDate={{ now | date \"2006-01-02\" }} -X main.buildCommit={{.COMMIT}}"
+
+tasks:
+  build_cli:
+    desc: Build gophkeeper cli
+    cmds:
+      - go build -ldflags "{{.LDFLAGS}}" ./cmd/gophkeeper/.
+#    silent: true
+  
+  build_server:
+    desc: Build gophkeeper server
+    cmds:
+      - go build -ldflags "{{.LDFLAGS}}" ./cmd/server/.
+
+  build:
+    desc: Build all
+    cmds:
+      - task: build_cli
+      - task: build_server
+
+  install_mkcert:
+    desc: Install mkcert
+    cmds:
+    - |
+      if ! command -v mkcert &> /dev/null; then
+        echo "Installing mkcert..."
+        powershell -Command "Start-Process PowerShell -Verb RunAs -ArgumentList 'choco','install','mkcert'"
+        mkcert -install
+      else
+        echo "mkcert is already installed."
+      fi
+  make_cert:
+    desc: Make cert for dev
+    cmds:
+      - mkdir certs; cd certs; mkcert localhost 127.0.0.1
+      - mv certs/localhost+1.pem certs/cert.pem
+      - mv certs/localhost+1-key.pem certs/key.pem
+
+  install_sqlite:
+    desc: Install sqlite3
+    cmds:
+    - |
+      if ! command -v sqlite3 &> /dev/null; then
+        echo "Installing sqlite3..."
+        winget install SQLite.SQLite
+      else
+        echo "sqlite3 is already installed."
+      fi
+  
+  install_migrate:
+    desc: Install migrate
+    cmds:
+    - |
+      if ! command -v migrate &> /dev/null; then
+        echo "Installing migrate..."
+        export CGO_ENABLED=1
+        go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      else
+        echo "migrate is already installed."
+      fi
+  
+  run_migrations:
+    vars:
+      dbpath: ./db/memopass.db
+    cmds:
+      - migrate -database sqlite3://{{.dbpath}}?query -path db/migrations up
+      
