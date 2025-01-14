@@ -45,7 +45,7 @@ type FormCaller struct {
 	ButtonNames []string
 }
 
-func InitForm(fc FormCaller) ModelForm {
+func InitForm(fc *FormCaller) *ModelForm {
 	m := ModelForm{
 		Name:   fc.FormName,
 		inputs: make([]textinput.Model, len(fc.InputNames)),
@@ -70,14 +70,14 @@ func InitForm(fc FormCaller) ModelForm {
 		m.inputs[i] = t
 	}
 	m.indexMax = len(m.inputs) + len(m.buttons) - 1
-	return m
+	return &m
 }
 
-func (m ModelForm) Init() tea.Cmd {
+func (m *ModelForm) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m ModelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *ModelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -184,7 +184,7 @@ func (m *ModelForm) updateInputs(msg tea.Msg) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (m ModelForm) View() string {
+func (m *ModelForm) View() string {
 	var b strings.Builder
 
 	for i := range m.inputs {

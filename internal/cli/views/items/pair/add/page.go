@@ -15,10 +15,10 @@ func InitPair(nextPage func()) modelForm {
 		InputNames:  []string{"Логин", "Пароль"},
 		ButtonNames: []string{"Добавить", "Отмена"},
 	}
-	m := form.InitForm(fc)
+	m := form.InitForm(&fc)
 	m.NextPage = nextPage
 	m.Control = new(ctrl.AddPairCtrl)
-	return m
+	return *m
 }
 
 type addPairPage struct {
@@ -36,7 +36,7 @@ func (pp *addPairPage) Init(width, height int) {
 }
 func (pp *addPairPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 	model, cmd := pp.Model.Update(msg)
-	pp.Model = model.(modelForm)
+	pp.Model = *model.(*modelForm)
 	return m, cmd
 }
 
