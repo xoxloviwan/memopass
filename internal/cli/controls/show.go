@@ -37,5 +37,16 @@ func (s ShowCtrl) GetPairs(limit int, offset int) ([]model.PairInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	for i := range pairs {
+		login, err := CrptMngr.Decrypt(pairs[i].Login)
+		if err == nil {
+			pairs[i].Login = login
+		}
+		password, err := CrptMngr.Decrypt(pairs[i].Password)
+		if err == nil {
+			pairs[i].Password = password
+		}
+	}
+
 	return pairs, nil
 }

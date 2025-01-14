@@ -15,11 +15,21 @@ type AddPairCtrl struct{}
 func (AddPairCtrl) Submit(p model.Pair) error {
 	body := new(bytes.Buffer)
 	w := multipart.NewWriter(body)
-	err := w.WriteField("login", p.Login)
+	encP := model.Pair{}
+	var err error
+	encP.Login, err = CrptMngr.Encrypt(p.Login)
 	if err != nil {
 		return err
 	}
-	err = w.WriteField("password", p.Password)
+	err = w.WriteField("login", encP.Login)
+	if err != nil {
+		return err
+	}
+	encP.Password, err = CrptMngr.Encrypt(p.Password)
+	if err != nil {
+		return err
+	}
+	err = w.WriteField("password", encP.Password)
 	if err != nil {
 		return err
 	}
