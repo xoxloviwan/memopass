@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"iwakho/gopherkeep/internal/model"
 	"iwakho/gopherkeep/internal/srv/jwt"
