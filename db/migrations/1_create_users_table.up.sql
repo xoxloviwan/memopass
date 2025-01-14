@@ -1,4 +1,4 @@
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL)
+    username VARCHAR(30) NOT NULL UNIQUE,
+    password VARCHAR(72) NOT NULL)
