@@ -93,7 +93,7 @@ func (ap *AuthPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 	tabModel, cmd := ap.TabContent[ap.activatedTab].Update(msg)
-	ap.TabContent[ap.activatedTab] = tabModel.(modelForm)
+	ap.TabContent[ap.activatedTab] = *tabModel.(*modelForm)
 	return m, cmd
 }
 

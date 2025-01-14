@@ -11,10 +11,10 @@ func InitLogin(nextPage func()) modelForm {
 		InputNames:  []string{"Логин", "Пароль"},
 		ButtonNames: []string{"Войти"},
 	}
-	m := form.InitForm(fc)
+	m := form.InitForm(&fc)
 	m.NextPage = nextPage
 	m.Control = new(ctrl.LoginCtrl)
-	return m
+	return *m
 }
 
 func InitSignUp(nextPage func()) modelForm {
@@ -27,8 +27,8 @@ func InitSignUp(nextPage func()) modelForm {
 		},
 		ButtonNames: []string{"Зарегистрироваться"},
 	}
-	m := form.InitForm(fc)
+	m := form.InitForm(&fc)
 	m.NextPage = nextPage
 	m.Control = new(ctrl.SignUpCtrl)
-	return m
+	return *m
 }
