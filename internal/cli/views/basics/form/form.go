@@ -45,7 +45,7 @@ type FormCaller struct {
 	ButtonNames []string
 }
 
-func InitForm(fc FormCaller) ModelForm {
+func InitForm(fc *FormCaller) *ModelForm {
 	m := ModelForm{
 		Name:   fc.FormName,
 		inputs: make([]textinput.Model, len(fc.InputNames)),
@@ -73,7 +73,7 @@ func InitForm(fc FormCaller) ModelForm {
 	return m
 }
 
-func (m ModelForm) Init() tea.Cmd {
+func (m *ModelForm) Init() tea.Cmd {
 	return textinput.Blink
 }
 
