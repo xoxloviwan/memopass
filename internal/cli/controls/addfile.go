@@ -14,7 +14,10 @@ import (
 type AddFileCtrl struct{}
 
 func (AddFileCtrl) Submit(filePath string) error {
-	file, _ := os.Open(filePath)
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
 	defer file.Close()
 
 	body := new(bytes.Buffer)
