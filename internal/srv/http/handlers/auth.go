@@ -44,18 +44,21 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	user := model.User{}
 	// читаем тело запроса
 	data, err := io.ReadAll(r.Body)
-	if err == nil {
-		err = json.Unmarshal(data, &creds)
-		if err == nil {
-			if creds.User == "" || creds.Pwd == "" {
-				err = errors.New("empty login or password")
-			}
-			if err == nil {
-				user.Name = creds.User
-				user.Hash, err = bcrypt.GenerateFromPassword([]byte(creds.Pwd), 0)
-			}
-		}
+	if err != nil {
+		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	err = json.Unmarshal(data, &creds)
+	if err != nil {
+		h.ErrorWithLog(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if creds.User == "" || creds.Pwd == "" {
+		h.ErrorWithLog(w, "empty login or password", http.StatusBadRequest)
+		return
+	}
+	user.Name = creds.User
+	user.Hash, err = bcrypt.GenerateFromPassword([]byte(creds.Pwd), 0)
 	if err != nil {
 		h.ErrorWithLog(w, err.Error(), http.StatusBadRequest)
 		return
