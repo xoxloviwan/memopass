@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	iHttp "iwakho/gopherkeep/internal/cli/http"
@@ -23,8 +24,7 @@ var (
 func init() {
 	flag.Parse()
 	if len(flag.Args()) > 0 {
-		fmt.Printf("Too many arguments")
-		os.Exit(1)
+		fatal(errors.New("too many arguments"))
 	}
 	if vers != nil && *vers {
 		fmt.Printf("Build version: %s\nBuild date: %s\nBuild commit: %s\n", buildVersion, buildDate, buildCommit)
