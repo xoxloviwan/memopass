@@ -31,7 +31,8 @@ func (LoginCtrl) Submit(p model.Pair) error {
 	}
 	token = resp.Header.Get("Authorization")
 	if token == "" {
-		return fmt.Errorf("Bad token")
+		return fmt.Errorf("bad token")
+
 	}
 	return nil
 }
