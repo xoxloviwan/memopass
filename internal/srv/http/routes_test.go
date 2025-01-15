@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"io"
 	"iwakho/gopherkeep/internal/srv/http/handlers"
 	mock "iwakho/gopherkeep/internal/srv/http/handlers/mockstore"
 	"iwakho/gopherkeep/internal/srv/jwt"
@@ -15,9 +16,8 @@ import (
 )
 
 type want struct {
-	code        int
-	contentType string
-	err         error
+	code int
+	err  error
 }
 
 type testcase struct {
@@ -29,7 +29,7 @@ type testcase struct {
 }
 
 func setup(t *testing.T) (http.Handler, *mock.MockStore) {
-	logger := iLog.New()
+	logger := iLog.New("0.0.0", false)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	db := mock.NewMockStore(ctrl)
@@ -127,6 +127,81 @@ func Test_AddPair(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			db.EXPECT().AddNewPair(gomock.Any(), userID, gomock.Any()).Return(tt.want.err)
+			req.Header.Set("Authorization", jwt.Bearer+tkn)
+			req.Header.Set("Content-Type", contentTypeHeader)
+			router.ServeHTTP(w, req)
+
+			if w.Code != tt.want.code {
+				t.Errorf("expected %v; got %v", tt.want.code, w.Code)
+			}
+		})
+	}
+}
+
+type file struct {
+	filename string
+	content  []byte
+	formname string
+}
+
+func multipartBodyFile(t *testing.T, file file) (*bytes.Buffer, string) {
+	body := new(bytes.Buffer)
+	w := multipart.NewWriter(body)
+	part, err := w.CreateFormFile(file.formname, file.filename)
+	if err != nil {
+		t.Error(err)
+		return nil, ""
+	}
+	_, err = io.Copy(part, bytes.NewBuffer(file.content))
+	if err != nil {
+		t.Error(err)
+		return nil, ""
+	}
+	err = w.Close()
+	if err != nil {
+		t.Error(err)
+		return nil, ""
+	}
+	return body, w.FormDataContentType()
+}
+
+type fileTestcase struct {
+	testcase
+	file
+}
+
+func Test_AddFile(t *testing.T) {
+	tests := []fileTestcase{
+		{
+			testcase: testcase{
+				name:   "success",
+				url:    "/api/v1/item/add?type=2",
+				method: http.MethodPost,
+				want: want{
+					code: http.StatusOK,
+				},
+			},
+			file: file{
+				filename: "test.txt",
+				content:  []byte("test"),
+				formname: "file",
+			},
+		},
+	}
+	router, db := setup(t)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			userID := 1
+			tkn, err := jwt.BuildJWT("user", userID)
+			if err != nil {
+				t.Error(err)
+			}
+			body, contentTypeHeader := multipartBodyFile(t, tt.file)
+			req := httptest.NewRequest(tt.method, tt.url, body)
+			w := httptest.NewRecorder()
+
+			db.EXPECT().AddFile(gomock.Any(), userID, gomock.Any(), gomock.Any()).Return(tt.want.err)
 			req.Header.Set("Authorization", jwt.Bearer+tkn)
 			req.Header.Set("Content-Type", contentTypeHeader)
 			router.ServeHTTP(w, req)

@@ -8,7 +8,6 @@ import (
 	btn "iwakho/gopherkeep/internal/cli/views/basics/button"
 	"iwakho/gopherkeep/internal/model"
 
-	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -28,7 +27,6 @@ type ModelForm struct {
 	Name        string
 	focusIndex  int
 	inputs      []textinput.Model
-	cursorMode  cursor.Mode
 	NextPage    func()
 	buttons     []string
 	indexMax    int

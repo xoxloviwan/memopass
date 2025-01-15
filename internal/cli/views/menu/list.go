@@ -14,15 +14,9 @@ var (
 	quitTextStyle = lipgloss.NewStyle().Margin(1, 0, 2, 4)
 )
 
-type choice struct {
-	item   string
-	action string
-}
-
 type modelList struct {
 	list        list.Model
 	takenItemID int
-	choose      choice
 	quitting    bool
 	nextPage    func(int)
 }

@@ -53,7 +53,7 @@ func main() {
 		dbPath = new(string)
 		*dbPath = defaultDBPath
 	}
-	logger := iLog.New()
+	logger := iLog.New(buildVersion, false)
 
 	db, err := store.NewStorage(*dbPath)
 	if err != nil {

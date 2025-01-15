@@ -130,7 +130,10 @@ func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *
 		}
 
 		err = stmt.Exec()
-		stmt.ClearBindings()
+		if err != nil {
+			return err
+		}
+		err = stmt.ClearBindings()
 		if err != nil {
 			return err
 		}

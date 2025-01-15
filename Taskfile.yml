@@ -23,6 +23,8 @@ tasks:
   build:
     desc: Build all
     cmds:
+      - task: lint
+      - task: cover    
       - task: build_cli
       - task: build_server
 
@@ -40,9 +42,14 @@ tasks:
   make_cert:
     desc: Make cert for dev
     cmds:
-      - mkdir certs; cd certs; mkcert localhost 127.0.0.1
-      - mv certs/localhost+1.pem certs/cert.pem
-      - mv certs/localhost+1-key.pem certs/key.pem
+      - |
+        if [ ! -d "certs" ]; then
+          mkdir certs; cd certs; mkcert localhost 127.0.0.1
+          mv certs/localhost+1.pem certs/cert.pem
+          mv certs/localhost+1-key.pem certs/key.pem
+        else
+          echo "certs folder already exists."
+        fi
 
   install_sqlite:
     desc: Install sqlite3
@@ -72,4 +79,51 @@ tasks:
       dbpath: ./db/memopass.db
     cmds:
       - migrate -database sqlite3://{{.dbpath}}?query -path db/migrations up
+  
+  install_linter:
+    desc: Install linter
+    cmds:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
+
+  lint:
+    desc: Run linter
+    cmds:
+      - golangci-lint run
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./...
+
+  install_coverage:
+    desc: Install coverage
+    cmds:
+        - go install github.com/vladopajic/go-test-coverage/v2@v2.10.1
       
+  cover:
+    desc: Run coverage
+    cmds:
+      - go test ./... -coverprofile=./cover.out -coverpkg=./...
+      - go tool cover -func ./cover.out
+      - go-test-coverage --config=./.testcoverage.yml
+
+  coverv:
+    desc: Open coverage in browser
+    cmds:
+      - go tool cover -html cover.out
+
+  install:
+    desc: Install all
+    cmds:
+      - task: install_mkcert
+      - task: install_sqlite
+      - task: install_migrate
+      - task: install_linter
+      - task: install_coverage
+      - task: make_cert
+      - task: run_migrations
+  
+  run:
+    desc: Run server
+    cmds:
+    - ./server

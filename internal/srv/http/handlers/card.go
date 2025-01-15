@@ -40,5 +40,9 @@ func (h *Handler) getCards(w http.ResponseWriter, r *http.Request, userID, limit
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(resp)
+	_, err = w.Write(resp)
+	if err != nil {
+		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

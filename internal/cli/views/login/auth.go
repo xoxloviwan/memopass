@@ -47,9 +47,6 @@ type AuthPage struct {
 	activatedTab int
 	Tabs         map[int]Tab
 	TabContent   []modelForm
-
-	width  int
-	height int
 }
 
 type Client interface {
@@ -72,7 +69,6 @@ func NewPage(onEnter func(), client Client) *AuthPage {
 }
 
 func (ap *AuthPage) Init(width, height int) {
-	ap.width = width
 }
 
 func (ap *AuthPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {

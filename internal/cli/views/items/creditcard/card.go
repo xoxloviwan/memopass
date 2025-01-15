@@ -12,10 +12,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type (
-	errMsg error
-)
-
 const (
 	ccn = iota
 	exp
