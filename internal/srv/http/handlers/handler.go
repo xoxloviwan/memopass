@@ -35,7 +35,7 @@ func NewHandler(store Store, logger logger) *Handler {
 	}
 }
 
-func (h Handler) ErrorWithLog(w http.ResponseWriter, err string, code int) {
+func (h *Handler) ErrorWithLog(w http.ResponseWriter, err string, code int) {
 	h.logger.Error(err, "request_id", w.Header().Get("X-Request-ID"))
 	http.Error(w, err, code)
 }
