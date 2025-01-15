@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"iwakho/gopherkeep/internal/model"
 	"net/http"
 	"time"
@@ -25,4 +26,19 @@ func (h *Handler) AddCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) getCards(w http.ResponseWriter, r *http.Request, userID, limit, offset int) {
+	cards, err := h.store.GetCards(r.Context(), userID, limit, offset)
+	if err != nil {
+		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	resp, err := json.Marshal(cards)
+	if err != nil {
+		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resp)
 }

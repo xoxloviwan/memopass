@@ -8,6 +8,8 @@ import (
 	"net/http"
 )
 
+//go:generate mockgen -destination ./mock/mock_store.go -package mockstore . Store
+
 type Store interface {
 	NewUser(ctx context.Context, user model.User) (int, error)
 	GetUser(ctx context.Context, username string) (*model.User, error)
@@ -16,6 +18,7 @@ type Store interface {
 	GetFiles(ctx context.Context, userID int, limit int, offset int) ([]model.FileInfo, error)
 	AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader) error
 	AddCard(ctx context.Context, userID int, card model.CardInfo) error
+	GetCards(ctx context.Context, userID int, limit int, offset int) ([]model.CardInfo, error)
 }
 
 type logger interface {

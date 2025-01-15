@@ -69,7 +69,7 @@ func (h *Handler) GetItems(w http.ResponseWriter, r *http.Request) {
 	case model.ItemTypeBinary:
 		h.getFiles(w, r, userID, limit, offset)
 	case model.ItemTypeCard:
-		// TODO: add card item
+		h.getCards(w, r, userID, limit, offset)
 	default:
 		h.ErrorWithLog(w, "unknown item type", http.StatusBadRequest)
 	}

@@ -186,3 +186,29 @@ func (db *Storage) AddCard(ctx context.Context, userID int, card model.CardInfo)
 	_, err := db.ExecContext(ctx, "INSERT INTO cards (user_id, ccn, exp, cvv, date, meta) VALUES ($1, $2, $3, $4, $5, $6)", userID, card.Number, card.Exp, card.VerifVal, card.Date, card.Text)
 	return err
 }
+
+func (db *Storage) GetCards(ctx context.Context, userID int, limit int, offset int) ([]model.CardInfo, error) {
+	cards := []model.CardInfo{}
+	rows, err := db.QueryContext(ctx, `SELECT ccn, exp, cvv, date, meta
+			FROM cards
+			WHERE user_id = @user_id ORDER BY date DESC LIMIT @limit OFFSET @offset`,
+		sql.Named("user_id", userID),
+		sql.Named("limit", limit),
+		sql.Named("offset", offset),
+	)
+	if err != nil {
+		return cards, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		card := model.CardInfo{}
+		err = rows.Scan(&card.Number, &card.Exp, &card.VerifVal, &card.Date, &card.Text)
+		if err != nil {
+			return cards, err
+		}
+		cards = append(cards, card)
+	}
+
+	return cards, nil
+}
