@@ -20,6 +20,9 @@ const (
 	ccn = iota
 	exp
 	cvv
+	ccnLen = 16 + 3
+	expLen = 5
+	cvvLen = 3
 )
 
 const (
@@ -48,7 +51,7 @@ type modelCard struct {
 func ccnValidator(s string) error {
 	// Credit Card Number should a string less than 20 digits
 	// It should include 16 integers and 3 spaces
-	if len(s) > 16+3 {
+	if len(s) > ccnLen {
 		return fmt.Errorf("CCN is too long")
 	}
 
@@ -138,7 +141,9 @@ func (m modelCard) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEnter:
-			if err := m.inputs[m.focused].Validate(m.inputs[m.focused].Value()); err != nil { // TODO fix this check
+			if len(m.inputs[ccn].Value()) != ccnLen ||
+				len(m.inputs[exp].Value()) != expLen ||
+				len(m.inputs[cvv].Value()) != cvvLen {
 				m.nextInput()
 				break
 			}
