@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-//go:generate mockgen -destination ./mock/mock_store.go -package mockstore . Store
+//go:generate mockgen -destination ./mockstore/mock_store.go -package mockstore . Store
 
 type Store interface {
 	NewUser(ctx context.Context, user model.User) (int, error)

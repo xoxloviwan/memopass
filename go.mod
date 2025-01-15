@@ -9,6 +9,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.4
 	github.com/go-pkgz/routegroup v1.2.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/ncruces/go-sqlite3 v0.21.3
 	golang.org/x/crypto v0.31.0
@@ -21,7 +22,6 @@ require (
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
-	github.com/golang/mock v1.6.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
