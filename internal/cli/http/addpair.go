@@ -7,30 +7,29 @@ import (
 	"iwakho/gopherkeep/internal/model"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 )
+
+func fillPairForm(p model.Pair, body *bytes.Buffer) (*multipart.Writer, error) {
+	w := newEncryptWriter(body)
+	err := w.encryptField("login", p.Login)
+	if err != nil {
+		return nil, err
+	}
+	err = w.encryptField("password", p.Password)
+	if err != nil {
+		return nil, err
+	}
+	err = w.Close()
+	if err != nil {
+		return nil, err
+	}
+	return w.Writer, nil
+}
 
 func (cli *Client) AddPair(p model.Pair) error {
 	body := new(bytes.Buffer)
-	w := multipart.NewWriter(body)
-	encP := model.Pair{}
-	var err error
-	encP.Login, err = CrptMngr.Encrypt(p.Login)
-	if err != nil {
-		return err
-	}
-	err = w.WriteField("login", encP.Login)
-	if err != nil {
-		return err
-	}
-	encP.Password, err = CrptMngr.Encrypt(p.Password)
-	if err != nil {
-		return err
-	}
-	err = w.WriteField("password", encP.Password)
-	if err != nil {
-		return err
-	}
-	err = w.Close()
+	w, err := fillPairForm(p, body)
 	if err != nil {
 		return err
 	}
@@ -41,7 +40,7 @@ func (cli *Client) AddPair(p model.Pair) error {
 	r.Header.Set("Authorization", cli.token)
 	r.Header.Set("Content-Type", w.FormDataContentType())
 	q := r.URL.Query()
-	q.Add("type", "0")
+	q.Add("type", strconv.Itoa(model.ItemTypeLoginPass))
 	r.URL.RawQuery = q.Encode()
 	resp, err := cli.Do(r)
 	if err != nil {

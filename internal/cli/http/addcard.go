@@ -7,6 +7,7 @@ import (
 	"iwakho/gopherkeep/internal/model"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 )
 
 type encryptWriter struct {
@@ -25,7 +26,7 @@ func newEncryptWriter(body *bytes.Buffer) *encryptWriter {
 	return &encryptWriter{Writer: multipart.NewWriter(body)}
 }
 
-func encryptMultipart(card model.Card, body *bytes.Buffer) (*multipart.Writer, error) {
+func fillCardForm(card model.Card, body *bytes.Buffer) (*multipart.Writer, error) {
 	w := newEncryptWriter(body)
 	err := w.encryptField("ccn", card.Number)
 	if err != nil {
@@ -39,16 +40,16 @@ func encryptMultipart(card model.Card, body *bytes.Buffer) (*multipart.Writer, e
 	if err != nil {
 		return nil, err
 	}
+	err = w.Close()
+	if err != nil {
+		return nil, err
+	}
 	return w.Writer, nil
 }
 
 func (cli *Client) AddCard(card model.Card) error {
 	body := new(bytes.Buffer)
-	w, err := encryptMultipart(card, body)
-	if err != nil {
-		return err
-	}
-	err = w.Close()
+	w, err := fillCardForm(card, body)
 	if err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func (cli *Client) AddCard(card model.Card) error {
 	r.Header.Set("Authorization", cli.token)
 	r.Header.Set("Content-Type", w.FormDataContentType())
 	q := r.URL.Query()
-	q.Add("type", "3")
+	q.Add("type", strconv.Itoa(model.ItemTypeCard))
 	r.URL.RawQuery = q.Encode()
 	resp, err := cli.Do(r)
 	if err != nil {
