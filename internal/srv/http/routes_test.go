@@ -170,7 +170,7 @@ type fileTestcase struct {
 	file
 }
 
-func Test_AddFile(t *testing.T) {
+func Test_AddFiles(t *testing.T) {
 	tests := []fileTestcase{
 		{
 			testcase: testcase{
@@ -187,6 +187,21 @@ func Test_AddFile(t *testing.T) {
 				formname: "file",
 			},
 		},
+		{
+			testcase: testcase{
+				name:   "success",
+				url:    "/api/v1/item/add/text",
+				method: http.MethodPost,
+				want: want{
+					code: http.StatusOK,
+				},
+			},
+			file: file{
+				filename: "test.txt",
+				content:  []byte("test"),
+				formname: "text",
+			},
+		},
 	}
 	router, db := setup(t)
 
@@ -201,7 +216,7 @@ func Test_AddFile(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, body)
 			w := httptest.NewRecorder()
 
-			db.EXPECT().AddFile(gomock.Any(), userID, gomock.Any(), gomock.Any()).Return(tt.want.err)
+			db.EXPECT().AddFile(gomock.Any(), userID, gomock.Any(), gomock.Any(), gomock.Any()).Return(tt.want.err)
 			req.Header.Set("Authorization", jwt.Bearer+tkn)
 			req.Header.Set("Content-Type", contentTypeHeader)
 			router.ServeHTTP(w, req)

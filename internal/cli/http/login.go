@@ -14,9 +14,9 @@ var (
 )
 
 func (cli *Client) Login(p model.Pair) error {
-	r, err := http.NewRequest("GET", cli.Api.Login, nil)
+	r, err := http.NewRequest("GET", cli.api.login, nil)
 	if err != nil {
-		return fmt.Errorf("Bad request: url=%s e=%s", cli.Api.Login, err)
+		return fmt.Errorf("Bad request: url=%s e=%s", cli.api.login, err)
 	}
 	r.SetBasicAuth(p.Login, p.Password)
 	resp, err := cli.Do(r)
@@ -25,7 +25,7 @@ func (cli *Client) Login(p model.Pair) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Bad status code: %d", resp.StatusCode)
+		return fmt.Errorf("Bad status code: %d url=%s", resp.StatusCode, cli.api.login)
 	}
 	token := resp.Header.Get("Authorization")
 	if token == "" {
@@ -48,10 +48,10 @@ func (cl *Client) SignUp(p model.Pair) error {
 	if err != nil {
 		return err
 	}
-	r, err := http.NewRequest("POST", cl.Api.SignUp, bytes.NewBuffer(body))
+	r, err := http.NewRequest("POST", cl.api.signUp, bytes.NewBuffer(body))
 	r.Header.Set("Content-Type", "application/json")
 	if err != nil {
-		return fmt.Errorf("Bad request: url=%s e=%s", cl.Api.SignUp, err)
+		return fmt.Errorf("Bad request: url=%s e=%s", cl.api.signUp, err)
 	}
 	resp, err := cl.Do(r)
 	if err != nil {

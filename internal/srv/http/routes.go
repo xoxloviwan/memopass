@@ -32,11 +32,14 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 	userLayer.HandleFunc("GET /login", h.Login)
 
 	apiRouter.Use(middleware.CheckAuth)
+
 	formGroup := apiRouter.Mount("/item/add")
 	formGroup.Use(middleware.ParseForm(rr.logger))
 	formGroup.HandleFunc("POST /pair", h.AddPair)
 	formGroup.HandleFunc("POST /card", h.AddCard)
-	formGroup.HandleFunc("POST /file", h.AddFile)
+	formGroup.HandleFunc("POST /file", h.AddBinary)
+	formGroup.HandleFunc("POST /text", h.AddText)
+
 	apiRouter.HandleFunc("GET /item", h.GetItems)
 
 	return router

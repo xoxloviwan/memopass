@@ -24,21 +24,23 @@ tasks:
     desc: Build all
     cmds:
       - task: lint
-      - task: cover    
+      - task: cover
       - task: build_cli
       - task: build_server
 
   install_mkcert:
     desc: Install mkcert
     cmds:
-    - |
-      if ! command -v mkcert &> /dev/null; then
-        echo "Installing mkcert..."
-        powershell -Command "Start-Process PowerShell -Verb RunAs -ArgumentList 'choco','install','mkcert'"
-        mkcert -install
-      else
-        echo "mkcert is already installed."
-      fi
+    - cmd: |
+        if ! command -v mkcert &> /dev/null; then
+          echo "Installing mkcert..."
+          powershell -Command "Start-Process PowerShell -Verb RunAs -ArgumentList 'choco','install','mkcert'"
+          mkcert -install
+        else
+          echo "mkcert is already installed."
+        fi
+      platforms: [windows]
+
   make_cert:
     desc: Make cert for dev
     cmds:
@@ -54,14 +56,16 @@ tasks:
   install_sqlite:
     desc: Install sqlite3
     cmds:
-    - |
-      if ! command -v sqlite3 &> /dev/null; then
-        echo "Installing sqlite3..."
-        winget install SQLite.SQLite
-      else
-        echo "sqlite3 is already installed."
-      fi
-  
+    - cmd: |
+          if ! command -v sqlite3 &> /dev/null; then
+            echo "Installing sqlite3..."
+            winget install SQLite.SQLite
+          else
+            echo "sqlite3 is already installed."
+          fi
+      platforms: [windows]
+    
+
   install_migrate:
     desc: Install migrate
     cmds:
@@ -83,7 +87,12 @@ tasks:
   install_linter:
     desc: Install linter
     cmds:
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
+      - |
+        if ! command -v golangci-lint &> /dev/null; then
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
+        else
+          echo "golangci-lint is already installed."
+        fi
 
   lint:
     desc: Run linter
@@ -115,15 +124,33 @@ tasks:
   install:
     desc: Install all
     cmds:
-      - task: install_mkcert
       - task: install_sqlite
       - task: install_migrate
       - task: install_linter
       - task: install_coverage
-      - task: make_cert
       - task: run_migrations
   
   run:
     desc: Run server
     cmds:
     - ./server
+  
+  run_tls:
+    desc: Run server with tls
+    cmds:
+      - task: install_mkcert
+      - task: make_cert
+      - ./server -c certs/cert.pem -k certs/key.pem
+  
+  run_cli:
+    desc: Run cli
+    cmds:
+      - ./gophkeeper
+
+  run_cli_tls:
+    desc: Run cli with tls
+    cmds:
+      - task: install_mkcert
+      - task: make_cert    
+      - ./gophkeeper -https -r certs/cert.pem
+

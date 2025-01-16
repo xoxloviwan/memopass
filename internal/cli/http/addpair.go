@@ -7,7 +7,6 @@ import (
 	"iwakho/gopherkeep/internal/model"
 	"mime/multipart"
 	"net/http"
-	"strconv"
 )
 
 func fillPairForm(p model.Pair, body *bytes.Buffer) (*multipart.Writer, error) {
@@ -33,15 +32,12 @@ func (cli *Client) AddPair(p model.Pair) error {
 	if err != nil {
 		return err
 	}
-	r, err := http.NewRequest("POST", cli.Api.AddItem, body)
+	r, err := http.NewRequest("POST", cli.api.add.pair, body)
 	if err != nil {
 		return err
 	}
 	r.Header.Set("Authorization", cli.token)
 	r.Header.Set("Content-Type", w.FormDataContentType())
-	q := r.URL.Query()
-	q.Add("type", strconv.Itoa(model.ItemTypeLoginPass))
-	r.URL.RawQuery = q.Encode()
 	resp, err := cli.Do(r)
 	if err != nil {
 		return err

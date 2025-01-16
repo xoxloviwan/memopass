@@ -81,7 +81,7 @@ func (db *Storage) GetPairs(ctx context.Context, userID int, limit int, offset i
 	return pairs, nil
 }
 
-func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader) error {
+func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader, isBinary bool) error {
 	conn, err := db.Conn(ctx)
 	if err != nil {
 		return err
@@ -97,15 +97,17 @@ func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *
 		defer db.SetInterrupt(old)
 
 		const (
-			prefix  = "@"
-			userTag = "user_id"
-			dateTag = "date"
-			nameTag = "name"
-			sizeTag = "size"
-			fileTag = "file"
+			prefix    = "@"
+			userTag   = "user_id"
+			dateTag   = "date"
+			nameTag   = "name"
+			sizeTag   = "size"
+			binaryTag = "binary"
+			fileTag   = "file"
 		)
-		query := fmt.Sprintf(`INSERT INTO files (%s, %s, %s, %s) VALUES (%s, %s, %s, zeroblob(%s))`,
-			userTag, dateTag, nameTag, fileTag, prefix+userTag, prefix+dateTag, prefix+nameTag, prefix+sizeTag)
+		query := fmt.Sprintf(`INSERT INTO files (%s, %s, %s, %s, %s) VALUES (%s, %s, %s, zeroblob(%s), %s)`,
+			userTag, dateTag, nameTag, fileTag, binaryTag,
+			prefix+userTag, prefix+dateTag, prefix+nameTag, prefix+sizeTag, prefix+binaryTag)
 
 		stmt, _, err := db.Prepare(query)
 		if err != nil {
@@ -121,6 +123,10 @@ func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *
 			return err
 		}
 		err = stmt.BindText(stmt.BindIndex(prefix+nameTag), fh.Filename)
+		if err != nil {
+			return err
+		}
+		err = stmt.BindBool(stmt.BindIndex(prefix+binaryTag), isBinary)
 		if err != nil {
 			return err
 		}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"iwakho/gopherkeep/internal/srv/config"
 	iHttp "iwakho/gopherkeep/internal/srv/http"
 	"iwakho/gopherkeep/internal/srv/http/handlers"
 	iLog "iwakho/gopherkeep/internal/srv/log"
@@ -16,20 +17,11 @@ import (
 	"time"
 )
 
-const (
-	defaultAddress  = ":443"
-	defaultDBPath   = "db/memopass.db"
-	defaultCertPath = "./certs/cert.pem"
-	defaultKeyPath  = "./certs/key.pem"
-)
-
 var (
 	buildVersion = "N/A"
 	buildDate    = "N/A"
 	buildCommit  = "N/A"
 	vers         = flag.Bool("v", false, "version")
-	address      = flag.String("a", defaultAddress, "server address")
-	dbPath       = flag.String("d", defaultDBPath, "database path")
 )
 
 func init() {
@@ -45,17 +37,10 @@ func init() {
 }
 
 func main() {
-	if address == nil {
-		address = new(string)
-		*address = defaultAddress
-	}
-	if dbPath == nil {
-		dbPath = new(string)
-		*dbPath = defaultDBPath
-	}
+	cfg := config.InitConfig(buildVersion)
 	logger := iLog.New(buildVersion, false)
 
-	db, err := store.NewStorage(*dbPath)
+	db, err := store.NewStorage(cfg.DBPath)
 	if err != nil {
 		logger.Error("Failed to connect to database", "error", err)
 		os.Exit(1)
@@ -68,7 +53,7 @@ func main() {
 	mux := router.SetupRoutes(hdl)
 
 	srv := &http.Server{
-		Addr:    *address,
+		Addr:    cfg.Address,
 		Handler: mux,
 	}
 
@@ -95,8 +80,13 @@ func main() {
 		close(idleConnsClosed)
 	}()
 
-	logger.Info("Starting server", "addr", srv.Addr)
-	err = srv.ListenAndServeTLS(defaultCertPath, defaultKeyPath)
+	useTLS := cfg.CertPath != "" && cfg.KeyPath != ""
+	logger.Info("Starting server", "addr", srv.Addr, "TLS", useTLS)
+	if useTLS {
+		err = srv.ListenAndServeTLS(cfg.CertPath, cfg.KeyPath)
+	} else {
+		err = srv.ListenAndServe()
+	}
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("Server error", "error", err)
 		os.Exit(1)

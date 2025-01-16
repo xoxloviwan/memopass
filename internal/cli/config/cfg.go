@@ -2,13 +2,18 @@ package config
 
 import (
 	"flag"
-	"os"
+	"fmt"
 )
 
-const defaultAddress = "https://localhost"
+const (
+	defaultAddress = "localhost:3000"
+	defaultScheme  = "http"
+)
 
 var (
-	address = flag.String("a", defaultAddress, "server address")
+	address    = flag.String("a", defaultAddress, "server address")
+	Scheme     = flag.Bool("https", false, "use https scheme")
+	rootCApath = flag.String("r", "", "path to root ca")
 )
 
 type Config struct {
@@ -18,10 +23,21 @@ type Config struct {
 }
 
 func InitConfig(version string) *Config {
-	rootCApath, _ := os.LookupEnv("ROOTCA_PATH")
+	scheme := defaultScheme
+	if Scheme != nil && *Scheme {
+		scheme += "s"
+	}
+	if address == nil {
+		address = new(string)
+		*address = defaultAddress
+	}
+	if rootCApath == nil {
+		rootCApath = new(string)
+		*rootCApath = ""
+	}
 	return &Config{
-		Address:    *address,
+		Address:    fmt.Sprintf("%s://%s", scheme, *address),
 		Version:    version,
-		RootCApath: rootCApath,
+		RootCApath: *rootCApath,
 	}
 }

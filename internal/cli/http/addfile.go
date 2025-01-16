@@ -4,12 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"iwakho/gopherkeep/internal/model"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 )
 
 func (cli *Client) AddFile(filePath string) error {
@@ -33,15 +31,12 @@ func (cli *Client) AddFile(filePath string) error {
 	if err != nil {
 		return err
 	}
-	r, err := http.NewRequest("POST", cli.Api.AddItem, body)
+	r, err := http.NewRequest("POST", cli.api.add.file, body)
 	if err != nil {
 		return err
 	}
 	r.Header.Set("Authorization", cli.token)
 	r.Header.Set("Content-Type", w.FormDataContentType())
-	q := r.URL.Query()
-	q.Add("type", strconv.Itoa(model.ItemTypeBinary))
-	r.URL.RawQuery = q.Encode()
 	resp, err := cli.Do(r)
 	if err != nil {
 		return err

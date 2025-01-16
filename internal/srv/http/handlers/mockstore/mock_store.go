@@ -52,17 +52,17 @@ func (mr *MockStoreMockRecorder) AddCard(arg0, arg1, arg2 interface{}) *gomock.C
 }
 
 // AddFile mocks base method.
-func (m *MockStore) AddFile(arg0 context.Context, arg1 int, arg2 io.Reader, arg3 *multipart.FileHeader) error {
+func (m *MockStore) AddFile(arg0 context.Context, arg1 int, arg2 io.Reader, arg3 *multipart.FileHeader, arg4 bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddFile", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "AddFile", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddFile indicates an expected call of AddFile.
-func (mr *MockStoreMockRecorder) AddFile(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) AddFile(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFile", reflect.TypeOf((*MockStore)(nil).AddFile), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFile", reflect.TypeOf((*MockStore)(nil).AddFile), arg0, arg1, arg2, arg3, arg4)
 }
 
 // AddPair mocks base method.

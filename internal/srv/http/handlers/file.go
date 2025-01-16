@@ -12,9 +12,21 @@ const (
 	errFileTooLarge = "file too large"
 )
 
-func (h *Handler) AddFile(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) AddBinary(w http.ResponseWriter, r *http.Request) {
+	h.addFile(w, r, true)
+}
+
+func (h *Handler) AddText(w http.ResponseWriter, r *http.Request) {
+	h.addFile(w, r, false)
+}
+
+func (h *Handler) addFile(w http.ResponseWriter, r *http.Request, isBinary bool) {
 	userID := r.Context().Value(model.UserIDCtxKey{}).(int)
-	fhs := r.MultipartForm.File["file"]
+	fieldName := "file"
+	if !isBinary {
+		fieldName = "text"
+	}
+	fhs := r.MultipartForm.File[fieldName]
 	if len(fhs) == 0 {
 		h.ErrorWithLog(w, errNoFile, http.StatusBadRequest)
 		return
@@ -30,7 +42,7 @@ func (h *Handler) AddFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-	err = h.store.AddFile(r.Context(), userID, file, f0)
+	err = h.store.AddFile(r.Context(), userID, file, f0, isBinary)
 	if err != nil {
 		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
 		return

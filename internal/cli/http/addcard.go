@@ -7,7 +7,6 @@ import (
 	"iwakho/gopherkeep/internal/model"
 	"mime/multipart"
 	"net/http"
-	"strconv"
 )
 
 type encryptWriter struct {
@@ -53,15 +52,12 @@ func (cli *Client) AddCard(card model.Card) error {
 	if err != nil {
 		return err
 	}
-	r, err := http.NewRequest("POST", cli.Api.AddItem, body)
+	r, err := http.NewRequest("POST", cli.api.add.card, body)
 	if err != nil {
 		return err
 	}
 	r.Header.Set("Authorization", cli.token)
 	r.Header.Set("Content-Type", w.FormDataContentType())
-	q := r.URL.Query()
-	q.Add("type", strconv.Itoa(model.ItemTypeCard))
-	r.URL.RawQuery = q.Encode()
 	resp, err := cli.Do(r)
 	if err != nil {
 		return err

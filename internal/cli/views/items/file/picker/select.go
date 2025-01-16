@@ -86,11 +86,11 @@ func (m modelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if m.selectedFile != "" {
 		err := m.control.AddFile(m.selectedFile)
+		m.selectedFile = ""
 		if err != nil {
 			m.err = err
 			return m, tea.Batch(cmd, clearErrorAfter(2*time.Second))
 		}
-		m.selectedFile = ""
 		m.nextPage()
 	}
 
