@@ -15,9 +15,9 @@ type Store interface {
 	GetUser(ctx context.Context, username string) (*model.User, error)
 	AddPair(ctx context.Context, userID int, pair model.PairInfo) error
 	GetPairs(ctx context.Context, userID int, limit int, offset int) ([]model.PairInfo, error)
-	GetFiles(ctx context.Context, userID int, limit int, offset int) ([]model.FileInfo, error)
 	AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader, isBinary bool) error
 	AddCard(ctx context.Context, userID int, card model.CardInfo) error
+	GetFiles(ctx context.Context, userID int, limit int, offset int, isBinary bool) ([]model.FileInfo, error)
 	GetCards(ctx context.Context, userID int, limit int, offset int) ([]model.CardInfo, error)
 }
 

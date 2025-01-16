@@ -50,8 +50,21 @@ func (h *Handler) addFile(w http.ResponseWriter, r *http.Request, isBinary bool)
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *Handler) getFiles(w http.ResponseWriter, r *http.Request, userID, limit, offset int) {
-	files, err := h.store.GetFiles(r.Context(), userID, limit, offset)
+func (h *Handler) GetBinaries(w http.ResponseWriter, r *http.Request) {
+	h.getFiles(w, r, true)
+}
+
+func (h *Handler) GetTexts(w http.ResponseWriter, r *http.Request) {
+	h.getFiles(w, r, false)
+}
+
+func (h *Handler) getFiles(w http.ResponseWriter, r *http.Request, isBinary bool) {
+	rCtx := r.Context()
+	userID := rCtx.Value(model.UserIDCtxKey{}).(int)
+	limit := rCtx.Value(model.LimitCtxKey{}).(int)
+	offset := rCtx.Value(model.OffsetCtxKey{}).(int)
+
+	files, err := h.store.GetFiles(rCtx, userID, limit, offset, isBinary)
 	if err != nil {
 		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
 		return

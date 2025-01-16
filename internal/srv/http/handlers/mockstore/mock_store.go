@@ -95,18 +95,18 @@ func (mr *MockStoreMockRecorder) GetCards(arg0, arg1, arg2, arg3 interface{}) *g
 }
 
 // GetFiles mocks base method.
-func (m *MockStore) GetFiles(arg0 context.Context, arg1, arg2, arg3 int) ([]model.FileInfo, error) {
+func (m *MockStore) GetFiles(arg0 context.Context, arg1, arg2, arg3 int, arg4 bool) ([]model.FileInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFiles", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "GetFiles", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].([]model.FileInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetFiles indicates an expected call of GetFiles.
-func (mr *MockStoreMockRecorder) GetFiles(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) GetFiles(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFiles", reflect.TypeOf((*MockStore)(nil).GetFiles), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFiles", reflect.TypeOf((*MockStore)(nil).GetFiles), arg0, arg1, arg2, arg3, arg4)
 }
 
 // GetPairs mocks base method.

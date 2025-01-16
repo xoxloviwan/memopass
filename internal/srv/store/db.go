@@ -159,7 +159,7 @@ func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *
 	})
 }
 
-func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset int) ([]model.FileInfo, error) {
+func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset int, isBinary bool) ([]model.FileInfo, error) {
 	files := []model.FileInfo{}
 	rows, err := db.QueryContext(ctx, `SELECT
 				name,
@@ -167,10 +167,11 @@ func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset i
 				date,
 				meta
 			FROM files
-			WHERE user_id = @user_id ORDER BY date DESC LIMIT @limit OFFSET @offset`,
+			WHERE user_id = @user_id and binary = @binary ORDER BY date DESC LIMIT @limit OFFSET @offset`,
 		sql.Named("user_id", userID),
 		sql.Named("limit", limit),
 		sql.Named("offset", offset),
+		sql.Named("binary", isBinary),
 	)
 	if err != nil {
 		return files, err

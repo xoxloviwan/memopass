@@ -28,8 +28,13 @@ func (h *Handler) AddCard(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *Handler) getCards(w http.ResponseWriter, r *http.Request, userID, limit, offset int) {
-	cards, err := h.store.GetCards(r.Context(), userID, limit, offset)
+func (h *Handler) GetCards(w http.ResponseWriter, r *http.Request) {
+	rCtx := r.Context()
+	userID := rCtx.Value(model.UserIDCtxKey{}).(int)
+	limit := rCtx.Value(model.LimitCtxKey{}).(int)
+	offset := rCtx.Value(model.OffsetCtxKey{}).(int)
+
+	cards, err := h.store.GetCards(rCtx, userID, limit, offset)
 	if err != nil {
 		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
 		return

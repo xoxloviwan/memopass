@@ -31,8 +31,13 @@ func (h *Handler) AddPair(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *Handler) getPairs(w http.ResponseWriter, r *http.Request, userID, limit, offset int) {
-	pairs, err := h.store.GetPairs(r.Context(), userID, limit, offset)
+func (h *Handler) GetPairs(w http.ResponseWriter, r *http.Request) {
+	rCtx := r.Context()
+	userID := rCtx.Value(model.UserIDCtxKey{}).(int)
+	limit := rCtx.Value(model.LimitCtxKey{}).(int)
+	offset := rCtx.Value(model.OffsetCtxKey{}).(int)
+
+	pairs, err := h.store.GetPairs(rCtx, userID, limit, offset)
 	if err != nil {
 		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
 		return

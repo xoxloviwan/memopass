@@ -13,3 +13,8 @@ type Metainfo struct {
 	Date time.Time `json:"creationDate"`
 	Text string    `json:"info"`
 }
+
+type (
+	LimitCtxKey  struct{}
+	OffsetCtxKey struct{}
+)

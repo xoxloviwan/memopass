@@ -3,15 +3,15 @@ package middleware
 import (
 	"context"
 	"fmt"
-	"iwakho/gopherkeep/internal/srv/jwt"
 	"iwakho/gopherkeep/internal/model"
+	"iwakho/gopherkeep/internal/srv/jwt"
 	"net/http"
 	"strings"
 )
 
 var errorAuthHeader = fmt.Sprintf(`%s realm="restricted", error="invalid_token"`, jwt.Bearer)
 
-func CheckAuth(next http.Handler) http.Handler {
+func (m *Middlewares) CheckAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		auth := r.Header.Get("Authorization")
 		if auth == "" {
