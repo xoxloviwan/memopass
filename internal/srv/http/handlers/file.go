@@ -6,16 +6,22 @@ import (
 	"net/http"
 )
 
+const (
+	maxFileSize     = 10 << 20 // 10 MB
+	errNoFile       = "no file provided"
+	errFileTooLarge = "file too large"
+)
+
 func (h *Handler) AddFile(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(model.UserIDCtxKey{}).(int)
 	fhs := r.MultipartForm.File["file"]
 	if len(fhs) == 0 {
-		h.ErrorWithLog(w, "no file provided", http.StatusBadRequest)
+		h.ErrorWithLog(w, errNoFile, http.StatusBadRequest)
 		return
 	}
 	f0 := fhs[0]
 	if f0.Size > maxFileSize {
-		h.ErrorWithLog(w, "file too large", http.StatusBadRequest)
+		h.ErrorWithLog(w, errFileTooLarge, http.StatusBadRequest)
 		return
 	}
 	file, err := f0.Open()

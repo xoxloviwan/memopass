@@ -23,7 +23,7 @@ func (h *Handler) AddPair(w http.ResponseWriter, r *http.Request) {
 			Text: r.PostForm.Get("meta"),
 		},
 	}
-	err := h.store.AddNewPair(r.Context(), userID, pairs)
+	err := h.store.AddPair(r.Context(), userID, pairs)
 	if err != nil {
 		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
 		return

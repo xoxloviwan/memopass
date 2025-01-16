@@ -61,7 +61,7 @@ func Test_AddCard(t *testing.T) {
 	tests := []testcase{
 		{
 			name:   "success",
-			url:    "/api/v1/item/add?type=3",
+			url:    "/api/v1/item/add/card",
 			method: http.MethodPost,
 			pars: map[string]string{
 				"cnn": "1234 5678 9012 3456",
@@ -102,7 +102,7 @@ func Test_AddPair(t *testing.T) {
 	tests := []testcase{
 		{
 			name:   "success",
-			url:    "/api/v1/item/add?type=0",
+			url:    "/api/v1/item/add/pair",
 			method: http.MethodPost,
 			pars: map[string]string{
 				"login":    "vasya",
@@ -126,7 +126,7 @@ func Test_AddPair(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, body)
 			w := httptest.NewRecorder()
 
-			db.EXPECT().AddNewPair(gomock.Any(), userID, gomock.Any()).Return(tt.want.err)
+			db.EXPECT().AddPair(gomock.Any(), userID, gomock.Any()).Return(tt.want.err)
 			req.Header.Set("Authorization", jwt.Bearer+tkn)
 			req.Header.Set("Content-Type", contentTypeHeader)
 			router.ServeHTTP(w, req)
@@ -175,7 +175,7 @@ func Test_AddFile(t *testing.T) {
 		{
 			testcase: testcase{
 				name:   "success",
-				url:    "/api/v1/item/add?type=2",
+				url:    "/api/v1/item/add/file",
 				method: http.MethodPost,
 				want: want{
 					code: http.StatusOK,

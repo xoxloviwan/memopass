@@ -65,18 +65,18 @@ func (mr *MockStoreMockRecorder) AddFile(arg0, arg1, arg2, arg3 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFile", reflect.TypeOf((*MockStore)(nil).AddFile), arg0, arg1, arg2, arg3)
 }
 
-// AddNewPair mocks base method.
-func (m *MockStore) AddNewPair(arg0 context.Context, arg1 int, arg2 model.PairInfo) error {
+// AddPair mocks base method.
+func (m *MockStore) AddPair(arg0 context.Context, arg1 int, arg2 model.PairInfo) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddNewPair", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "AddPair", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AddNewPair indicates an expected call of AddNewPair.
-func (mr *MockStoreMockRecorder) AddNewPair(arg0, arg1, arg2 interface{}) *gomock.Call {
+// AddPair indicates an expected call of AddPair.
+func (mr *MockStoreMockRecorder) AddPair(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNewPair", reflect.TypeOf((*MockStore)(nil).AddNewPair), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPair", reflect.TypeOf((*MockStore)(nil).AddPair), arg0, arg1, arg2)
 }
 
 // GetCards mocks base method.

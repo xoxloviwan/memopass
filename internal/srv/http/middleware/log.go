@@ -9,6 +9,7 @@ import (
 )
 
 type logger interface {
+	Error(msg string, args ...any)
 	Info(msg string, args ...any)
 	With(args ...any) *slog.Logger
 }

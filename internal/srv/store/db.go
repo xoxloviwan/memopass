@@ -46,7 +46,7 @@ func (db *Storage) GetUser(ctx context.Context, login string) (*model.User, erro
 	return &u, nil
 }
 
-func (db *Storage) AddNewPair(ctx context.Context, userID int, pair model.PairInfo) error {
+func (db *Storage) AddPair(ctx context.Context, userID int, pair model.PairInfo) error {
 	_, err := db.ExecContext(ctx, "INSERT INTO pairs (user_id, date, login, password, meta) VALUES ($1, $2, $3, $4, $5)", userID, pair.Date, pair.Login, pair.Password, pair.Text)
 	return err
 }
