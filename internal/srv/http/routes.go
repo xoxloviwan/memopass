@@ -42,11 +42,11 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 	formGroup.HandleFunc("POST /text", h.AddText)
 
 	getGroup := apiRouter.Mount("/item")
-	formGroup.Use(mware.ParseQueryParams)
-	getGroup.HandleFunc("GET /pair", h.GetPairs)
-	getGroup.HandleFunc("GET /card", h.GetCards)
-	getGroup.HandleFunc("GET /file", h.GetBinaries)
-	getGroup.HandleFunc("GET /text", h.GetTexts)
+	getGroup.Use(mware.ParseQueryParams)
+	getGroup.HandleFunc("GET /pairs", h.GetPairs)
+	getGroup.HandleFunc("GET /cards", h.GetCards)
+	getGroup.HandleFunc("GET /files", h.GetBinaries)
+	getGroup.HandleFunc("GET /texts", h.GetTexts)
 
 	return router
 }

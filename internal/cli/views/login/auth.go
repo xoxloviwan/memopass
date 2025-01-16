@@ -49,16 +49,16 @@ type AuthPage struct {
 	TabContent   []modelForm
 }
 
-type Client interface {
+type Control interface {
 	Login(p model.Pair) error
 	SignUp(p model.Pair) error
 }
 
-func NewPage(onEnter func(), client Client) *AuthPage {
+func NewPage(onEnter func(), ctrl Control) *AuthPage {
 	ap := AuthPage{
 		TabContent: []modelForm{
-			InitLogin(onEnter, client),
-			InitSignUp(onEnter, client),
+			InitLogin(onEnter, ctrl),
+			InitSignUp(onEnter, ctrl),
 		},
 		Tabs: make(map[int]Tab),
 	}

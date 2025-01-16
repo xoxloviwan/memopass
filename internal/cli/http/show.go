@@ -11,12 +11,11 @@ import (
 
 func (cli *Client) GetPairs(limit int, offset int) ([]model.PairInfo, error) {
 	pairs := []model.PairInfo{}
-	r, err := http.NewRequest("GET", cli.Api.getItem, nil)
+	r, err := http.NewRequest("GET", cli.Api.Get.Pair, nil)
 	if err != nil {
 		return nil, err
 	}
 	q := r.URL.Query()
-	q.Add("type", "0")
 	q.Add("limit", strconv.Itoa(limit))
 	q.Add("offset", strconv.Itoa(offset))
 	r.URL.RawQuery = q.Encode()

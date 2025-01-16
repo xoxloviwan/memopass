@@ -15,8 +15,8 @@ type PickerPage struct {
 	height int
 }
 
-func NewPage(nextPage func(), client fileSender) *PickerPage {
-	return &PickerPage{newModelPicker(nextPage, client), 0, 0}
+func NewPage(nextPage func(), ctrl Control) *PickerPage {
+	return &PickerPage{newModelPicker(nextPage, ctrl), 0, 0}
 }
 
 func (pp *PickerPage) Init(width, height int) {

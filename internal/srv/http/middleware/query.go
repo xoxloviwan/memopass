@@ -7,13 +7,19 @@ import (
 	"strconv"
 )
 
+const (
+	limitDefault  = 10
+	offsetDefault = 0
+)
+
 func (m *Middlewares) ParseQueryParams(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		queries := r.URL.Query()
 		limitStr := queries.Get("limit")
 		offsetStr := queries.Get("offset")
 
-		var limit, offset int
+		limit := limitDefault
+		offset := offsetDefault
 		var err error
 		if limitStr != "" {
 			limit, err = strconv.Atoi(limitStr)

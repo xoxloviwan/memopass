@@ -12,6 +12,10 @@ type Controller struct {
 	crypto *iCrypto.CryptoManager
 }
 
+func New(cli *iHttp.Client) *Controller {
+	return &Controller{cli, nil}
+}
+
 func (c *Controller) Login(p model.Pair) error {
 	err := c.cli.Login(p)
 	if err != nil {
@@ -57,4 +61,8 @@ func (c *Controller) AddFile(filePath string) error {
 		return err
 	}
 	return c.cli.AddItem(c.cli.Add.File, body, header)
+}
+
+func (c *Controller) GetPairs(limit int, offset int) ([]model.PairInfo, error) {
+	return c.cli.GetPairs(limit, offset)
 }

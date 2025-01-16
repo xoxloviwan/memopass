@@ -8,14 +8,14 @@ import (
 )
 
 const (
-	apiLogin   = "/user/login"
-	apiSignUp  = "/user/signup"
-	apiAddPair = "/item/add/pair"
-	apiAddCard = "/item/add/card"
-	apiAddFile = "/item/add/file"
-	apiAddText = "/item/add/text"
-	apiGetItem = "/item"
-	apiBase    = "/api/v1"
+	apiLogin    = "/user/login"
+	apiSignUp   = "/user/signup"
+	apiAddPair  = "/item/add/pair"
+	apiAddCard  = "/item/add/card"
+	apiAddFile  = "/item/add/file"
+	apiAddText  = "/item/add/text"
+	apiGetPairs = "/item/pairs"
+	apiBase     = "/api/v1"
 )
 
 type items struct {
@@ -26,10 +26,10 @@ type items struct {
 }
 
 type Api struct {
-	login   string
-	signUp  string
-	Add     items
-	getItem string
+	login  string
+	signUp string
+	Add    items
+	Get    items
 }
 
 type Client struct {
@@ -39,7 +39,7 @@ type Client struct {
 	http.Client
 }
 
-func InitClient(certPath string, baseURL string) (*Client, error) {
+func New(certPath string, baseURL string) (*Client, error) {
 	apiURL := baseURL + apiBase
 	api := Api{
 		login:  apiURL + apiLogin,
@@ -50,7 +50,9 @@ func InitClient(certPath string, baseURL string) (*Client, error) {
 			File: apiURL + apiAddFile,
 			Text: apiURL + apiAddText,
 		},
-		getItem: apiURL + apiGetItem,
+		Get: items{
+			Pair: apiURL + apiGetPairs,
+		},
 	}
 	if certPath == "" {
 		return &Client{

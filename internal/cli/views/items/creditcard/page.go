@@ -10,8 +10,8 @@ type CardPage struct {
 	height int
 }
 
-func NewPage(nextPage func(), client Control) *CardPage {
-	return &CardPage{newModelCard(nextPage, client), 0, 0}
+func NewPage(nextPage func(), ctrl Control) *CardPage {
+	return &CardPage{newModelCard(nextPage, ctrl), 0, 0}
 }
 
 func (pp *CardPage) Init(width, height int) {

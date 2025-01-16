@@ -9,17 +9,17 @@ import (
 
 type modelForm = form.ModelForm
 
-type Client interface {
+type Control interface {
 	AddPair(model.Pair) error
 }
 
-func InitPair(nextPage func(), client Client) modelForm {
+func InitPair(nextPage func(), ctrl Control) modelForm {
 	fc := form.FormCaller{
 		FormName:    "Вход",
 		InputNames:  []string{"Логин", "Пароль"},
 		ButtonNames: []string{"Добавить", "Отмена"},
 	}
-	m := form.InitForm(&fc, client.AddPair)
+	m := form.InitForm(&fc, ctrl.AddPair)
 	m.NextPage = nextPage
 	return *m
 }
@@ -30,8 +30,8 @@ type addPairPage struct {
 	height int
 }
 
-func NewPage(nextPage func(), client Client) *addPairPage {
-	return &addPairPage{InitPair(nextPage, client), 0, 0}
+func NewPage(nextPage func(), ctrl Control) *addPairPage {
+	return &addPairPage{InitPair(nextPage, ctrl), 0, 0}
 }
 
 func (pp *addPairPage) Init(width, height int) {

@@ -4,12 +4,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	app "iwakho/gopherkeep/internal/cli"
 	"iwakho/gopherkeep/internal/cli/config"
-	iHttp "iwakho/gopherkeep/internal/cli/http"
-	"iwakho/gopherkeep/internal/cli/views"
+	httpClient "iwakho/gopherkeep/internal/cli/http"
 	"os"
-
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 var (
@@ -32,14 +30,9 @@ func init() {
 
 func main() {
 	cfg := config.InitConfig(buildVersion)
-	cli, err := iHttp.InitClient(cfg.RootCApath, cfg.Address)
+	client, err := httpClient.New(cfg.RootCApath, cfg.Address)
 	fatal(err)
-	m, err := views.NewApp(cli)
-	fatal(err)
-	p := tea.NewProgram(m, func(pp *tea.Program) {
-		m.Sender = pp
-	})
-	_, err = p.Run()
+	err = app.New(client).Run()
 	fatal(err)
 }
 

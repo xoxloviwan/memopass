@@ -13,7 +13,7 @@ type modelList struct {
 	list     list.Model
 	ready    bool
 	nextPage func()
-	client
+	Control
 }
 
 func (m modelList) pairsItems() []list.Item {

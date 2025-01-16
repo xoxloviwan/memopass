@@ -10,7 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type fileSender interface {
+type Control interface {
 	AddFile(string) error
 }
 
@@ -21,10 +21,10 @@ type modelPicker struct {
 	err          error
 	nextPage     func()
 	is1stUpdate  bool
-	control      fileSender
+	Control
 }
 
-func newModelPicker(nextPage func(), client fileSender) modelPicker {
+func newModelPicker(nextPage func(), ctrl Control) modelPicker {
 	fp := filepicker.New()
 	fp.ShowHidden = true
 	fp.AutoHeight = true
@@ -34,7 +34,7 @@ func newModelPicker(nextPage func(), client fileSender) modelPicker {
 		filepicker:  fp,
 		nextPage:    nextPage,
 		is1stUpdate: true,
-		control:     client,
+		Control:     ctrl,
 	}
 }
 
@@ -85,7 +85,7 @@ func (m modelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	if m.selectedFile != "" {
-		err := m.control.AddFile(m.selectedFile)
+		err := m.AddFile(m.selectedFile)
 		m.selectedFile = ""
 		if err != nil {
 			m.err = err

@@ -28,7 +28,7 @@ func listModel() list.Model {
 	return l
 }
 
-type client interface {
+type Control interface {
 	GetPairs(int, int) ([]model.PairInfo, error)
 }
 
@@ -38,11 +38,11 @@ type pairPage struct {
 	height int
 }
 
-func NewPage(nextPage func(), client client) *pairPage {
+func NewPage(nextPage func(), ctrl Control) *pairPage {
 	return &pairPage{modelList{
 		list:     listModel(),
 		nextPage: nextPage,
-		client:   client,
+		Control:  ctrl,
 	}, 0, 0}
 }
 
