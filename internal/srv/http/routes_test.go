@@ -29,7 +29,7 @@ type testcase struct {
 }
 
 func setup(t *testing.T) (http.Handler, *mock.MockStore) {
-	logger := iLog.New("0.0.0", false)
+	logger := iLog.New("memopass", "0.0.0", false)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	db := mock.NewMockStore(ctrl)

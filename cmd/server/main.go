@@ -38,7 +38,7 @@ func init() {
 
 func main() {
 	cfg := config.InitConfig(buildVersion)
-	logger := iLog.New(buildVersion, false)
+	logger := iLog.New("memopass", buildVersion, false)
 
 	db, err := store.NewStorage(cfg.DBPath)
 	if err != nil {

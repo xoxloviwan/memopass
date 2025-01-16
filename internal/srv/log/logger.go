@@ -7,7 +7,7 @@ import (
 
 type Log = *slog.Logger
 
-func New(version string, prodEnv bool) Log {
+func New(appname, version string, prodEnv bool) Log {
 	lvl := new(slog.LevelVar)
 	if prodEnv {
 		lvl.Set(slog.LevelInfo)
@@ -16,5 +16,5 @@ func New(version string, prodEnv bool) Log {
 	}
 	Log := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: lvl}))
 	slog.SetDefault(Log)
-	return Log.With("version", version, "app", "memopass")
+	return Log.With("version", version, "app", appname)
 }
