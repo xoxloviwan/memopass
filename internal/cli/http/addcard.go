@@ -4,60 +4,16 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"iwakho/gopherkeep/internal/model"
-	"mime/multipart"
 	"net/http"
 )
 
-type encryptWriter struct {
-	*multipart.Writer
-}
-
-func (w *encryptWriter) encryptField(name string, value string) error {
-	ecnrypted, err := CrptMngr.Encrypt(value)
-	if err != nil {
-		return err
-	}
-	return w.WriteField(name, ecnrypted)
-}
-
-func newEncryptWriter(body *bytes.Buffer) *encryptWriter {
-	return &encryptWriter{Writer: multipart.NewWriter(body)}
-}
-
-func fillCardForm(card model.Card, body *bytes.Buffer) (*multipart.Writer, error) {
-	w := newEncryptWriter(body)
-	err := w.encryptField("ccn", card.Number)
-	if err != nil {
-		return nil, err
-	}
-	err = w.encryptField("exp", card.Exp)
-	if err != nil {
-		return nil, err
-	}
-	err = w.encryptField("cvv", card.VerifVal)
-	if err != nil {
-		return nil, err
-	}
-	err = w.Close()
-	if err != nil {
-		return nil, err
-	}
-	return w.Writer, nil
-}
-
-func (cli *Client) AddCard(card model.Card) error {
-	body := new(bytes.Buffer)
-	w, err := fillCardForm(card, body)
-	if err != nil {
-		return err
-	}
-	r, err := http.NewRequest("POST", cli.api.add.card, body)
+func (cli *Client) AddItem(url string, body *bytes.Buffer, contentHeader string) error {
+	r, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err
 	}
 	r.Header.Set("Authorization", cli.token)
-	r.Header.Set("Content-Type", w.FormDataContentType())
+	r.Header.Set("Content-Type", contentHeader)
 	resp, err := cli.Do(r)
 	if err != nil {
 		return err

@@ -19,36 +19,36 @@ const (
 )
 
 type items struct {
-	pair string
-	card string
-	file string
-	text string
+	Pair string
+	Card string
+	File string
+	Text string
 }
 
-type api struct {
+type Api struct {
 	login   string
 	signUp  string
-	add     items
+	Add     items
 	getItem string
 }
 
 type Client struct {
 	token   string
 	baseURL string
-	api
+	Api
 	http.Client
 }
 
 func InitClient(certPath string, baseURL string) (*Client, error) {
 	apiURL := baseURL + apiBase
-	api := api{
+	api := Api{
 		login:  apiURL + apiLogin,
 		signUp: apiURL + apiSignUp,
-		add: items{
-			pair: apiURL + apiAddPair,
-			card: apiURL + apiAddCard,
-			file: apiURL + apiAddFile,
-			text: apiURL + apiAddText,
+		Add: items{
+			Pair: apiURL + apiAddPair,
+			Card: apiURL + apiAddCard,
+			File: apiURL + apiAddFile,
+			Text: apiURL + apiAddText,
 		},
 		getItem: apiURL + apiGetItem,
 	}
@@ -56,7 +56,7 @@ func InitClient(certPath string, baseURL string) (*Client, error) {
 		return &Client{
 			Client:  http.Client{},
 			baseURL: baseURL,
-			api:     api,
+			Api:     api,
 		}, nil
 	}
 	caCert, err := os.ReadFile(certPath)
@@ -74,6 +74,6 @@ func InitClient(certPath string, baseURL string) (*Client, error) {
 			},
 		},
 		baseURL: baseURL,
-		api:     api,
+		Api:     api,
 	}, nil
 }

@@ -11,7 +11,7 @@ import (
 
 func (cli *Client) GetPairs(limit int, offset int) ([]model.PairInfo, error) {
 	pairs := []model.PairInfo{}
-	r, err := http.NewRequest("GET", cli.api.getItem, nil)
+	r, err := http.NewRequest("GET", cli.Api.getItem, nil)
 	if err != nil {
 		return nil, err
 	}
