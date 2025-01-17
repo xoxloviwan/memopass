@@ -10,15 +10,19 @@ import (
 )
 
 type modelList struct {
-	list     list.Model
-	ready    bool
-	nextPage func()
+	list       list.Model
+	ready      bool
+	nextPage   func()
+	allFetched bool
+	// perPage  int
 	Control
 }
 
-func (m modelList) pairsItems() []list.Item {
+func (m modelList) getMoreItems() []list.Item {
 	items := []list.Item{}
-	pairs, err := m.GetPairs(10, 0)
+	itemsPerPage := m.list.Paginator.PerPage
+	offset := len(m.list.Items())
+	pairs, err := m.GetPairs(itemsPerPage, offset)
 	if err != nil {
 		return []list.Item{item.Item{Title: "Ошибка", Description: err.Error()}}
 	}
@@ -34,12 +38,12 @@ func (m modelList) pairsItems() []list.Item {
 }
 
 func (m modelList) Init() tea.Cmd {
-	return m.list.SetItems(m.pairsItems())
+	return m.list.SetItems(m.getMoreItems())
 }
 
 func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if !m.ready {
-		cmd := m.list.SetItems(m.pairsItems())
+		cmd := m.list.SetItems(m.getMoreItems())
 		m.ready = true
 		return m, cmd
 	}
@@ -54,6 +58,20 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ready = false
 			m.nextPage()
 			return m, nil
+		case "down":
+			if m.list.Paginator.OnLastPage() && m.list.Index() == len(m.list.Items())-1 && !m.allFetched {
+				items := m.list.Items()
+				newItems := m.getMoreItems()
+				if len(newItems) == 0 {
+					m.allFetched = true
+					return m, nil
+				}
+				items = append(items, newItems...)
+				cmd := m.list.SetItems(items)
+				var cmd2 tea.Cmd
+				m.list, cmd2 = m.list.Update(msg)
+				return m, tea.Batch(cmd, cmd2)
+			}
 		}
 	}
 

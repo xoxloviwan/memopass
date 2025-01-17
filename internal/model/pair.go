@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 )
 
 type Pair struct {
@@ -30,4 +31,29 @@ func FillPairForm(p Pair, crpt Encryptor) (body *bytes.Buffer, header string, er
 		return nil, "", err
 	}
 	return body, w.FormDataContentType(), nil
+}
+
+type Decryptor interface {
+	Decrypt(string) (string, error)
+}
+
+func DecryptPairs(data []byte, crpt Decryptor) (pairs []PairInfo, err error) {
+	err = json.Unmarshal(data, &pairs)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range pairs {
+		login, err := crpt.Decrypt(pairs[i].Login)
+		if err != nil {
+			return pairs, err
+		}
+		pairs[i].Login = login
+		password, err := crpt.Decrypt(pairs[i].Password)
+		if err != nil {
+			return pairs, err
+		}
+		pairs[i].Password = password
+	}
+	return pairs, nil
 }

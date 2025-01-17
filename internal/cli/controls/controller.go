@@ -64,5 +64,9 @@ func (c *Controller) AddFile(filePath string) error {
 }
 
 func (c *Controller) GetPairs(limit int, offset int) ([]model.PairInfo, error) {
-	return c.cli.GetPairs(limit, offset)
+	pairs, err := c.cli.GetItems(c.cli.Api.Get.Pair, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	return model.DecryptPairs(pairs, c.crypto)
 }

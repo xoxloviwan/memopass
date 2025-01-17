@@ -60,11 +60,13 @@ func InitPages(ctrl Controller) *Pages {
 		if (id == 1 || id == 4) && p.Sender != nil {
 			go p.Send(new(tea.Msg))
 		}
+		if id == 1 {
+			p.add(offset+id, showPairs.NewPage(p.nextPage(1), ctrl)) // reset list
+		}
 	}))
 	p.add(offset+0, addPair.NewPage(p.nextPage(1), ctrl))
 	p.add(offset+1, showPairs.NewPage(p.nextPage(1), ctrl))
 	p.add(offset+2, p.get(1)) // TODO text editor
-	p.add(offset+3, p.get(1)) // TODO text viewer
 	p.add(offset+3, p.get(1)) // TODO text viewer
 	p.add(offset+4, picker.NewPage(p.nextPage(1), ctrl))
 	p.add(offset+5, p.get(1)) // TODO file download

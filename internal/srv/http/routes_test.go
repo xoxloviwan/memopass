@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"io"
+	"iwakho/gopherkeep/internal/model"
 	"iwakho/gopherkeep/internal/srv/http/handlers"
 	mock "iwakho/gopherkeep/internal/srv/http/handlers/mockstore"
 	"iwakho/gopherkeep/internal/srv/jwt"
@@ -219,6 +220,40 @@ func Test_AddFiles(t *testing.T) {
 			db.EXPECT().AddFile(gomock.Any(), userID, gomock.Any(), gomock.Any(), gomock.Any()).Return(tt.want.err)
 			req.Header.Set("Authorization", jwt.Bearer+tkn)
 			req.Header.Set("Content-Type", contentTypeHeader)
+			router.ServeHTTP(w, req)
+
+			if w.Code != tt.want.code {
+				t.Errorf("expected %v; got %v", tt.want.code, w.Code)
+			}
+		})
+	}
+}
+
+func Test_GetPairs(t *testing.T) {
+	tests := []testcase{
+		{
+			name:   "success",
+			url:    "/api/v1/item/pairs?offset=0&limit=10",
+			method: http.MethodGet,
+			want: want{
+				code: http.StatusOK,
+			},
+		},
+	}
+	router, db := setup(t)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			userID := 1
+			tkn, err := jwt.BuildJWT("user", userID)
+			if err != nil {
+				t.Error(err)
+			}
+			req := httptest.NewRequest(tt.method, tt.url, nil)
+			w := httptest.NewRecorder()
+
+			db.EXPECT().GetPairs(gomock.Any(), userID, gomock.Any(), gomock.Any()).Return([]model.PairInfo{}, tt.want.err)
+			req.Header.Set("Authorization", jwt.Bearer+tkn)
 			router.ServeHTTP(w, req)
 
 			if w.Code != tt.want.code {

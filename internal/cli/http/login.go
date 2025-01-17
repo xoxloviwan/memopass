@@ -33,7 +33,6 @@ func (cli *Client) Login(p model.Pair) error {
 
 	}
 	cli.token = token
-	CrptMngr = crypto.NewCryptoManager(p)
 	return nil
 }
 
@@ -66,6 +65,5 @@ func (cl *Client) SignUp(p model.Pair) error {
 		return fmt.Errorf("bad token")
 	}
 	cl.token = token
-	CrptMngr = crypto.NewCryptoManager(p)
 	return nil
 }
