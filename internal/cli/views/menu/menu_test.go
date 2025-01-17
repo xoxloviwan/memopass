@@ -19,7 +19,7 @@ func (m *listPageWrapper) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m.listPage.Update(m, msg)
 }
 
-func TestAuth(t *testing.T) {
+func TestMenu(t *testing.T) {
 	// Initialize the model to test.
 	m := NewPage(func(i int) {})
 	catwalk.RunModel(t, "menu", &listPageWrapper{m})

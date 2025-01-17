@@ -26,7 +26,7 @@ func (m *CardPageWrapper) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m.CardPage.Update(m, msg)
 }
 
-func TestAuth(t *testing.T) {
+func TestCard(t *testing.T) {
 	// Initialize the model to test.
 	m := NewPage(func() {}, &MockController{})
 	catwalk.RunModel(t, "card", &CardPageWrapper{m})

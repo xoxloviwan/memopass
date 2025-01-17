@@ -25,7 +25,7 @@ func (m *TextAreaPageWrapper) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m.TextareaPage.Update(m, msg)
 }
 
-func TestAuth(t *testing.T) {
+func TestTextArea(t *testing.T) {
 	// Initialize the model to test.
 	m := NewPage(func() {}, &MockController{})
 	catwalk.RunModel(t, "textarea", &TextAreaPageWrapper{m})

@@ -22,6 +22,7 @@ type modelPicker struct {
 	nextPage     func()
 	is1stUpdate  bool
 	Control
+	testMode bool
 }
 
 func newModelPicker(nextPage func(), ctrl Control) modelPicker {
@@ -106,7 +107,11 @@ func (m modelPicker) View() string {
 	if m.err != nil {
 		s.WriteString(m.filepicker.Styles.DisabledFile.Render(m.err.Error()))
 	} else if m.selectedFile == "" {
-		s.WriteString("" + m.filepicker.CurrentDirectory)
+		if m.testMode {
+			s.WriteString("/c/Projects/gopherkeep")
+		} else {
+			s.WriteString(m.filepicker.CurrentDirectory)
+		}
 	} else {
 		s.WriteString("Выбран файл: " + m.filepicker.Styles.Selected.Render(m.selectedFile))
 	}
