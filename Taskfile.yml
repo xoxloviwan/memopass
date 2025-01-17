@@ -158,4 +158,10 @@ tasks:
       - task: install_mkcert
       - task: make_cert    
       - ./gophkeeper -https -r certs/cert.pem
+  
 
+  make_tests:
+    desc: Make tests for views with "github.com/knz/catwalk"
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - go test . -args -rewrite
