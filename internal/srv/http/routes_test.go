@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"iwakho/gopherkeep/internal/model"
 	"iwakho/gopherkeep/internal/srv/http/handlers"
@@ -14,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type want struct {
@@ -329,4 +331,91 @@ func Test_GetFiles(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_Signup(t *testing.T) {
+	tests := []testcase{
+		{
+			name:   "success",
+			url:    "/api/v1/user/signup",
+			method: http.MethodPost,
+			pars: map[string]string{
+				"login":    "vasya",
+				"password": "123456",
+			},
+			want: want{
+				code: http.StatusOK,
+			},
+		},
+	}
+
+	router, db := setup(t)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			creds := model.Creds{
+				User: tt.pars["login"],
+				Pwd:  tt.pars["password"],
+			}
+			body, err := json.Marshal(creds)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			req := httptest.NewRequest(tt.method, tt.url, bytes.NewBuffer(body))
+			req.Header.Set("Content-Type", "application/json")
+			w := httptest.NewRecorder()
+
+			userID := 1
+
+			db.EXPECT().NewUser(gomock.Any(), gomock.Any()).Return(userID, tt.want.err).Times(1)
+			router.ServeHTTP(w, req)
+
+			if w.Code != tt.want.code {
+				t.Errorf("expected %v; got %v", tt.want.code, w.Code)
+			}
+		})
+	}
+}
+
+func Test_Login(t *testing.T) {
+	tests := []testcase{
+		{
+			name:   "success",
+			url:    "/api/v1/user/login",
+			method: http.MethodGet,
+			pars: map[string]string{
+				"login":    "vasya",
+				"password": "123456",
+			},
+			want: want{
+				code: http.StatusOK,
+			},
+		},
+	}
+
+	router, db := setup(t)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(tt.method, tt.url, nil)
+			req.SetBasicAuth(tt.pars["login"], tt.pars["password"])
+			w := httptest.NewRecorder()
+			user := &model.User{
+				ID:   1,
+				Name: tt.pars["login"],
+			}
+			var err error
+			user.Hash, err = bcrypt.GenerateFromPassword([]byte(tt.pars["password"]), 0)
+			if err != nil {
+				t.Error(err)
+			}
+			db.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(user, tt.want.err).Times(1)
+			router.ServeHTTP(w, req)
+
+			if w.Code != tt.want.code {
+				t.Errorf("expected %v; got %v", tt.want.code, w.Code)
+			}
+		})
+	}
+
 }

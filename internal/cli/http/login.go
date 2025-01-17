@@ -4,13 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"iwakho/gopherkeep/internal/cli/crypto"
 	"iwakho/gopherkeep/internal/model"
 	"net/http"
-)
-
-var (
-	CrptMngr *crypto.CryptoManager
 )
 
 func (cli *Client) Login(p model.Pair) error {
@@ -35,8 +30,6 @@ func (cli *Client) Login(p model.Pair) error {
 	cli.token = token
 	return nil
 }
-
-type SignUpCtrl struct{}
 
 func (cl *Client) SignUp(p model.Pair) error {
 	creds := model.Creds{
