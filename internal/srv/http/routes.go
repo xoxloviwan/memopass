@@ -23,26 +23,25 @@ func NewRouter(mux *http.ServeMux, logger log.Log) *Router {
 }
 
 func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
-	mware := middleware.New(rr.logger)
 	router := routegroup.New(rr.mux)
-	router.Use(mware.Logging)
+	router.Use(middleware.Logging(rr.logger))
 
 	apiRouter := router.Mount("/api/v1")
 	userLayer := apiRouter.Mount("/user")
 	userLayer.HandleFunc("POST /signup", h.SignUp)
 	userLayer.HandleFunc("GET /login", h.Login)
 
-	apiRouter.Use(mware.CheckAuth)
+	apiRouter.Use(middleware.CheckAuth)
 
 	formGroup := apiRouter.Mount("/item/add")
-	formGroup.Use(mware.ParseForm)
+	formGroup.Use(middleware.ParseForm(rr.logger))
 	formGroup.HandleFunc("POST /pair", h.AddPair)
 	formGroup.HandleFunc("POST /card", h.AddCard)
 	formGroup.HandleFunc("POST /file", h.AddBinary)
 	formGroup.HandleFunc("POST /text", h.AddText)
 
 	getGroup := apiRouter.Mount("/item")
-	getGroup.Use(mware.ParseQueryParams)
+	getGroup.Use(middleware.ParseQueryParams(rr.logger))
 	getGroup.HandleFunc("GET /pairs", h.GetPairs)
 	getGroup.HandleFunc("GET /cards", h.GetCards)
 	getGroup.HandleFunc("GET /files", h.GetBinaries)

@@ -14,38 +14,33 @@ type logger interface {
 	With(args ...any) *slog.Logger
 }
 
-type Middlewares struct {
-	logger
-}
+type middleware func(http.Handler) http.Handler
 
-func New(logger logger) *Middlewares {
-	return &Middlewares{logger}
-}
+func Logging(logger logger) middleware {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			reqID := uuid.New().String()
+			w.Header().Set("X-Request-ID", reqID)
+			logger := logger.With(
+				slog.String("request_id", reqID),
+			)
+			logger.Info(
+				"REQ",
+				slog.String("method", r.Method),
+				slog.String("uri", r.URL.String()),
+				slog.String("ip", r.RemoteAddr),
+				slog.String("size", r.Header.Get("Content-Length")),
+				slog.String("user_agent", r.Header.Get("User-Agent")),
+			)
 
-func (mw *Middlewares) Logging(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqID := uuid.New().String()
-		w.Header().Set("X-Request-ID", reqID)
-		mw.logger = mw.logger.With(
-			slog.String("request_id", reqID),
-		)
-		logger := mw.logger
-		logger.Info(
-			"REQ",
-			slog.String("method", r.Method),
-			slog.String("uri", r.URL.String()),
-			slog.String("ip", r.RemoteAddr),
-			slog.String("size", r.Header.Get("Content-Length")),
-			slog.String("user_agent", r.Header.Get("User-Agent")),
-		)
-
-		// this runs handler next and captures information about HTTP request
-		m := httpsnoop.CaptureMetrics(next, w, r)
-		logger.Info(
-			"RES",
-			slog.Int("status", m.Code),
-			slog.Duration("duration", m.Duration),
-			slog.Int64("size", m.Written),
-		)
-	})
+			// this runs handler next and captures information about HTTP request
+			m := httpsnoop.CaptureMetrics(next, w, r)
+			logger.Info(
+				"RES",
+				slog.Int("status", m.Code),
+				slog.Duration("duration", m.Duration),
+				slog.Int64("size", m.Written),
+			)
+		})
+	}
 }
