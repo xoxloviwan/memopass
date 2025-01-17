@@ -391,6 +391,18 @@ func Test_Login(t *testing.T) {
 				code: http.StatusOK,
 			},
 		},
+		{
+			name:   "unauthorized",
+			url:    "/api/v1/user/login",
+			method: http.MethodGet,
+			pars: map[string]string{
+				"login":    "vasya",
+				"password": "1234567",
+			},
+			want: want{
+				code: http.StatusUnauthorized,
+			},
+		},
 	}
 
 	router, db := setup(t)
@@ -405,7 +417,11 @@ func Test_Login(t *testing.T) {
 				Name: tt.pars["login"],
 			}
 			var err error
-			user.Hash, err = bcrypt.GenerateFromPassword([]byte(tt.pars["password"]), 0)
+			passwordFromStore := []byte(tt.pars["password"])
+			if tt.want.code == http.StatusUnauthorized {
+				passwordFromStore = []byte("truepass")
+			}
+			user.Hash, err = bcrypt.GenerateFromPassword(passwordFromStore, 0)
 			if err != nil {
 				t.Error(err)
 			}
