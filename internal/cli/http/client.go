@@ -15,6 +15,7 @@ const (
 	apiAddFile  = "/item/add/file"
 	apiAddText  = "/item/add/text"
 	apiGetPairs = "/item/pairs"
+	apiGetCards = "/item/cards"
 	apiBase     = "/api/v1"
 )
 
@@ -52,6 +53,7 @@ func New(certPath string, baseURL string) (*Client, error) {
 		},
 		Get: items{
 			Pair: apiURL + apiGetPairs,
+			Card: apiURL + apiGetCards,
 		},
 	}
 	if certPath == "" {

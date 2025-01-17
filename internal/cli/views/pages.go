@@ -1,7 +1,8 @@
 package views
 
 import (
-	"iwakho/gopherkeep/internal/cli/views/items/creditcard"
+	addCard "iwakho/gopherkeep/internal/cli/views/items/creditcard/add"
+	showCards "iwakho/gopherkeep/internal/cli/views/items/creditcard/show"
 	"iwakho/gopherkeep/internal/cli/views/items/file/picker"
 	addPair "iwakho/gopherkeep/internal/cli/views/items/pair/add"
 	showPairs "iwakho/gopherkeep/internal/cli/views/items/pair/show"
@@ -36,9 +37,10 @@ type Pages struct {
 type Controller interface {
 	login.Control
 	addPair.Control
-	creditcard.Control
+	addCard.Control
 	picker.Control
 	showPairs.Control
+	showCards.Control
 }
 
 func InitPages(ctrl Controller) *Pages {
@@ -70,8 +72,8 @@ func InitPages(ctrl Controller) *Pages {
 	p.add(offset+3, p.get(1)) // TODO text viewer
 	p.add(offset+4, picker.NewPage(p.nextPage(1), ctrl))
 	p.add(offset+5, p.get(1)) // TODO file download
-	p.add(offset+6, creditcard.NewPage(p.nextPage(1), ctrl))
-	p.add(offset+7, p.get(1)) // TODO credit card list view
+	p.add(offset+6, addCard.NewPage(p.nextPage(1), ctrl))
+	p.add(offset+7, showCards.NewPage(p.nextPage(1), ctrl))
 
 	return &p
 }

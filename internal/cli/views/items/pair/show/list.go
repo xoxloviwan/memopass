@@ -30,7 +30,7 @@ func (m modelList) getMoreItems() []list.Item {
 	for _, v := range pairs {
 		item := item.Item{
 			Title:       v.Date.Local().String(),
-			Description: fmt.Sprintf("Логин: %s\nПароль: %s", v.Login, v.Password),
+			Description: fmt.Sprintf("\tЛогин: %s\n\tПароль: %s", v.Login, v.Password),
 		}
 		items = append(items, item)
 	}

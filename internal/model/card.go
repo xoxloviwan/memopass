@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 	"mime/multipart"
 )
 
@@ -57,4 +58,29 @@ func FillCardForm(card Card, crpt Encryptor) (body *bytes.Buffer, header string,
 		return nil, "", err
 	}
 	return body, w.FormDataContentType(), nil
+}
+
+func DecryptCards(data []byte, crpt Decryptor) (cards []CardInfo, err error) {
+	err = json.Unmarshal(data, &cards)
+	if err != nil {
+		return nil, err
+	}
+	for i := range cards {
+		num, err := crpt.Decrypt(cards[i].Number)
+		if err != nil {
+			return cards, err
+		}
+		cards[i].Number = num
+		exp, err := crpt.Decrypt(cards[i].Exp)
+		if err != nil {
+			return cards, err
+		}
+		cards[i].Exp = exp
+		cvv, err := crpt.Decrypt(cards[i].VerifVal)
+		if err != nil {
+			return cards, err
+		}
+		cards[i].VerifVal = cvv
+	}
+	return cards, nil
 }

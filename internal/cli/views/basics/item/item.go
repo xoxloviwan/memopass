@@ -36,7 +36,7 @@ func (d ItemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	str := i.Title
 
 	if i.Description != "" {
-		str = str + fmt.Sprintf("\n %s", i.Description)
+		str = str + fmt.Sprintf("\n%s", i.Description)
 	}
 
 	fn := itemStyle.Render

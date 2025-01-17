@@ -70,3 +70,11 @@ func (c *Controller) GetPairs(limit int, offset int) ([]model.PairInfo, error) {
 	}
 	return model.DecryptPairs(pairs, c.crypto)
 }
+
+func (c *Controller) GetCards(limit int, offset int) ([]model.CardInfo, error) {
+	cards, err := c.cli.GetItems(c.cli.Api.Get.Card, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	return model.DecryptCards(cards, c.crypto)
+}
