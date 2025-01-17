@@ -17,7 +17,7 @@ var (
 const listHeight = 14
 
 func listModel() list.Model {
-	const defaultWidth = 20
+	const defaultWidth = 100
 
 	l := list.New([]list.Item{}, item.ItemDelegate{}, defaultWidth, listHeight)
 	l.Title = "Посмотреть пары логин/пароль"
