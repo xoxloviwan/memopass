@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"iwakho/gopherkeep/internal/model"
 	"iwakho/gopherkeep/internal/srv/http/handlers"
@@ -24,11 +23,12 @@ type want struct {
 }
 
 type testcase struct {
-	name   string
-	url    string
-	method string
-	want   want
-	pars   map[string]string
+	name        string
+	url         string
+	method      string
+	contentType string
+	want        want
+	pars        map[string]string
 }
 
 func setup(t *testing.T) (http.Handler, *mock.MockStore) {
@@ -340,11 +340,71 @@ func Test_Signup(t *testing.T) {
 			url:    "/api/v1/user/signup",
 			method: http.MethodPost,
 			pars: map[string]string{
-				"login":    "vasya",
-				"password": "123456",
+				"body": `{"login": "vasya", "password": "123456"}`,
 			},
+			contentType: "application/json",
 			want: want{
 				code: http.StatusOK,
+			},
+		},
+		{
+			name:   "bad_content_type",
+			url:    "/api/v1/user/signup",
+			method: http.MethodPost,
+			pars: map[string]string{
+				"body": `{"login": "vasya", "password": "123456"}`,
+			},
+			contentType: "",
+			want: want{
+				code: http.StatusBadRequest,
+			},
+		},
+		{
+			name:   "bad_json",
+			url:    "/api/v1/user/signup",
+			method: http.MethodPost,
+			pars: map[string]string{
+				"body": `{"login": "vasya", password": "123456"}`,
+			},
+			contentType: "application/json",
+			want: want{
+				code: http.StatusBadRequest,
+			},
+		},
+		{
+			name:   "empty_login",
+			url:    "/api/v1/user/signup",
+			method: http.MethodPost,
+			pars: map[string]string{
+				"body": `{"login": "", "password": "123456"}`,
+			},
+			contentType: "application/json",
+			want: want{
+				code: http.StatusBadRequest,
+			},
+		},
+		{
+			name:   "empty_password",
+			url:    "/api/v1/user/signup",
+			method: http.MethodPost,
+			pars: map[string]string{
+				"body": `{"login": "vasya", "password": ""}`,
+			},
+			contentType: "application/json",
+			want: want{
+				code: http.StatusBadRequest,
+			},
+		},
+		{
+			name:   "extra_long_password",
+			url:    "/api/v1/user/signup",
+			method: http.MethodPost,
+			pars: map[string]string{
+				"body": `{"login": "vasya", "password": "12345671234567123456712345671234567123456712345671234567123456712345671234567123456712345671234567"}`,
+			},
+			contentType: "application/json",
+			want: want{
+				code: http.StatusBadRequest,
 			},
 		},
 	}
@@ -352,17 +412,10 @@ func Test_Signup(t *testing.T) {
 	router, db := setup(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			creds := model.Creds{
-				User: tt.pars["login"],
-				Pwd:  tt.pars["password"],
+			req := httptest.NewRequest(tt.method, tt.url, bytes.NewBuffer([]byte(tt.pars["body"])))
+			if tt.contentType != "" {
+				req.Header.Set("Content-Type", tt.contentType)
 			}
-			body, err := json.Marshal(creds)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			req := httptest.NewRequest(tt.method, tt.url, bytes.NewBuffer(body))
-			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 
 			userID := 1
