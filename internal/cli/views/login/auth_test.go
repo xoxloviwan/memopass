@@ -32,5 +32,5 @@ func (m *AuthPageWrapper) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func TestAuth(t *testing.T) {
 	// Initialize the model to test.
 	m := NewPage(func() {}, &MockController{})
-	catwalk.RunModel(t, "login_tab", &AuthPageWrapper{m})
+	catwalk.RunModel(t, "auth", &AuthPageWrapper{m})
 }
