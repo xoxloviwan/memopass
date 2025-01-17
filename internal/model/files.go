@@ -18,6 +18,24 @@ type FileInfo struct {
 	Metainfo `json:"meta"`
 }
 
+func FillTextForm(text string) (body *bytes.Buffer, header string, err error) {
+	body = new(bytes.Buffer)
+	w := multipart.NewWriter(body)
+	part, err := w.CreateFormFile("text", "text.txt")
+	if err != nil {
+		return nil, "", err
+	}
+	_, err = io.Copy(part, bytes.NewBuffer([]byte(text)))
+	if err != nil {
+		return nil, "", err
+	}
+	err = w.Close()
+	if err != nil {
+		return nil, "", err
+	}
+	return body, w.FormDataContentType(), nil
+}
+
 func FillFileForm(file *os.File) (body *bytes.Buffer, header string, err error) {
 	body = new(bytes.Buffer)
 	w := multipart.NewWriter(body)

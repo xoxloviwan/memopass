@@ -78,3 +78,11 @@ func (c *Controller) GetCards(limit int, offset int) ([]model.CardInfo, error) {
 	}
 	return model.DecryptCards(cards, c.crypto)
 }
+
+func (c *Controller) AddText(text string) error {
+	body, header, err := model.FillTextForm(text)
+	if err != nil {
+		return err
+	}
+	return c.cli.AddItem(c.cli.Add.Text, body, header)
+}

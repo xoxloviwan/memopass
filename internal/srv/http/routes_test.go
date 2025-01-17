@@ -262,3 +262,71 @@ func Test_GetPairs(t *testing.T) {
 		})
 	}
 }
+
+func Test_GetCards(t *testing.T) {
+	tests := []testcase{
+		{
+			name:   "success",
+			url:    "/api/v1/item/cards?offset=0&limit=10",
+			method: http.MethodGet,
+			want: want{
+				code: http.StatusOK,
+			},
+		},
+	}
+	router, db := setup(t)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			userID := 1
+			tkn, err := jwt.BuildJWT("user", userID)
+			if err != nil {
+				t.Error(err)
+			}
+			req := httptest.NewRequest(tt.method, tt.url, nil)
+			w := httptest.NewRecorder()
+
+			db.EXPECT().GetCards(gomock.Any(), userID, gomock.Any(), gomock.Any()).Return([]model.CardInfo{}, tt.want.err)
+			req.Header.Set("Authorization", jwt.Bearer+tkn)
+			router.ServeHTTP(w, req)
+
+			if w.Code != tt.want.code {
+				t.Errorf("expected %v; got %v", tt.want.code, w.Code)
+			}
+		})
+	}
+}
+
+func Test_GetFiles(t *testing.T) {
+	tests := []testcase{
+		{
+			name:   "success",
+			url:    "/api/v1/item/files?offset=0&limit=10",
+			method: http.MethodGet,
+			want: want{
+				code: http.StatusOK,
+			},
+		},
+	}
+	router, db := setup(t)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			userID := 1
+			tkn, err := jwt.BuildJWT("user", userID)
+			if err != nil {
+				t.Error(err)
+			}
+			req := httptest.NewRequest(tt.method, tt.url, nil)
+			w := httptest.NewRecorder()
+
+			db.EXPECT().GetFiles(gomock.Any(), userID, gomock.Any(), gomock.Any(), gomock.Any()).Return([]model.FileInfo{}, tt.want.err)
+			req.Header.Set("Authorization", jwt.Bearer+tkn)
+			router.ServeHTTP(w, req)
+
+			if w.Code != tt.want.code {
+				t.Errorf("expected %v; got %v", tt.want.code, w.Code)
+			}
+		})
+	}
+}

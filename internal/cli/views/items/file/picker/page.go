@@ -1,13 +1,8 @@
 package picker
 
 import (
-	// ctrl "iwakho/gopherkeep/internal/cli/controls"
-	// "iwakho/gopherkeep/internal/cli/views/basics/form"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
-
-// type modelForm = form.ModelForm
 
 type PickerPage struct {
 	Model  modelPicker

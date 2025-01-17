@@ -5,4 +5,5 @@ CREATE TABLE cards (
   cvv TEXT NOT NULL,
   date DATETIME NOT NULL,
   meta TEXT
-)
+);
+CREATE INDEX cards_user_id_idx ON cards (user_id);

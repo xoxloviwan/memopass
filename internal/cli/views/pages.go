@@ -6,6 +6,7 @@ import (
 	"iwakho/gopherkeep/internal/cli/views/items/file/picker"
 	addPair "iwakho/gopherkeep/internal/cli/views/items/pair/add"
 	showPairs "iwakho/gopherkeep/internal/cli/views/items/pair/show"
+	addText "iwakho/gopherkeep/internal/cli/views/items/textarea/add"
 	"iwakho/gopherkeep/internal/cli/views/login"
 	"iwakho/gopherkeep/internal/cli/views/menu"
 
@@ -41,6 +42,7 @@ type Controller interface {
 	picker.Control
 	showPairs.Control
 	showCards.Control
+	addText.Control
 }
 
 func InitPages(ctrl Controller) *Pages {
@@ -68,7 +70,7 @@ func InitPages(ctrl Controller) *Pages {
 	}))
 	p.add(offset+0, addPair.NewPage(p.nextPage(1), ctrl))
 	p.add(offset+1, showPairs.NewPage(p.nextPage(1), ctrl))
-	p.add(offset+2, p.get(1)) // TODO text editor
+	p.add(offset+2, addText.NewPage(p.nextPage(1), ctrl))
 	p.add(offset+3, p.get(1)) // TODO text viewer
 	p.add(offset+4, picker.NewPage(p.nextPage(1), ctrl))
 	p.add(offset+5, p.get(1)) // TODO file download

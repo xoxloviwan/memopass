@@ -5,4 +5,5 @@ CREATE TABLE files (
   date DATETIME NOT NULL,
   binary BOOLEAN NOT NULL,
   meta TEXT
-)
+);
+CREATE INDEX files_user_id_idx ON files (user_id);

@@ -107,7 +107,12 @@ tasks:
   install_coverage:
     desc: Install coverage
     cmds:
-        - go install github.com/vladopajic/go-test-coverage/v2@v2.10.1
+      - |
+        if ! command -v go-test-coverage &> /dev/null; then
+          go install github.com/vladopajic/go-test-coverage/v2@v2.10.1
+        else
+          echo "go-test-coverage is already installed."
+        fi
       
   cover:
     desc: Run coverage
