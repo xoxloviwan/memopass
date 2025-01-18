@@ -51,11 +51,11 @@ func clearErrorAfter(t time.Duration) tea.Cmd {
 	})
 }
 
-func (m modelPicker) Init() tea.Cmd {
+func (m *modelPicker) Init() tea.Cmd {
 	return m.filepicker.Init()
 }
 
-func (m modelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *modelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.is1stUpdate {
 		m.is1stUpdate = false
 		return m, m.Init()
@@ -102,7 +102,7 @@ func (m modelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m modelPicker) View() string {
+func (m *modelPicker) View() string {
 	if m.quitting {
 		return ""
 	}
