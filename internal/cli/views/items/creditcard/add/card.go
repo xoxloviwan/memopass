@@ -41,7 +41,7 @@ type modelCard struct {
 	Control
 }
 
-func newModelCard(nextPage func(), ctrl Control) modelCard {
+func newModelCard(nextPage func(), ctrl Control) *modelCard {
 	var inputs []textinput.Model = make([]textinput.Model, 3)
 	inputs[ccn] = textinput.New()
 	inputs[ccn].Placeholder = "4505 **** **** 1234"
@@ -65,7 +65,7 @@ func newModelCard(nextPage func(), ctrl Control) modelCard {
 	inputs[cvv].Prompt = ""
 	inputs[cvv].Validate = cvvValidator
 
-	return modelCard{
+	return &modelCard{
 		inputs:   inputs,
 		focused:  0,
 		err:      errors.New("not filled"),
@@ -74,11 +74,15 @@ func newModelCard(nextPage func(), ctrl Control) modelCard {
 	}
 }
 
-func (m modelCard) Init() tea.Cmd {
+func NewPage(nextPage func(), ctrl Control) *modelCard {
+	return newModelCard(nextPage, ctrl)
+}
+
+func (m *modelCard) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m modelCard) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *modelCard) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd = make([]tea.Cmd, len(m.inputs))
 
 	switch msg := msg.(type) {
@@ -126,7 +130,7 @@ func (m modelCard) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m modelCard) View() string {
+func (m *modelCard) View() string {
 	return fmt.Sprintf(
 		` Добавить новую карту:
 

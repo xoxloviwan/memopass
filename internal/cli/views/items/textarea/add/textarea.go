@@ -20,12 +20,12 @@ type Control interface {
 	AddText(string) error
 }
 
-func NewTextareaModel(nextPage func(), ctrl Control) textAreaModel {
+func newTextareaModel(nextPage func(), ctrl Control) *textAreaModel {
 	ti := textarea.New()
 	ti.Placeholder = "Однажды это случилось ..."
 	ti.Focus()
 
-	return textAreaModel{
+	return &textAreaModel{
 		textarea: ti,
 		err:      nil,
 		nextPage: nextPage,
@@ -33,11 +33,15 @@ func NewTextareaModel(nextPage func(), ctrl Control) textAreaModel {
 	}
 }
 
-func (m textAreaModel) Init() tea.Cmd {
+func NewPage(nextPage func(), ctrl Control) *textAreaModel {
+	return newTextareaModel(nextPage, ctrl)
+}
+
+func (m *textAreaModel) Init() tea.Cmd {
 	return textarea.Blink
 }
 
-func (m textAreaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *textAreaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
@@ -76,7 +80,7 @@ func (m textAreaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m textAreaModel) View() string {
+func (m *textAreaModel) View() string {
 	return fmt.Sprintf(
 		"Введите текст:\n\n%s\n\n%s",
 		m.textarea.View(),

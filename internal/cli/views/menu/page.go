@@ -4,32 +4,12 @@ import (
 	"iwakho/gopherkeep/internal/cli/views/basics/item"
 
 	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 var (
 	paginationStyle = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
 	helpStyle       = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 )
-
-type listPage struct {
-	Model  modelList
-	width  int
-	height int
-}
-
-func (lp *listPage) Init(width, height int) {
-	lp.width = width
-}
-func (lp *listPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
-	model, cmd := lp.Model.Update(msg)
-	lp.Model = model.(modelList)
-	return m, cmd
-}
-
-func (lp *listPage) View() string {
-	return lp.Model.View()
-}
 
 type BaseList struct {
 	Items []list.Item
@@ -84,7 +64,7 @@ func listModel(lst BaseList) list.Model {
 	return l
 }
 
-func NewPage(nextPage func(int)) *listPage {
+func NewPage(nextPage func(int)) *modelList {
 	l := listModel(mainItems())
-	return &listPage{modelList{list: l, nextPage: nextPage}, 0, 0}
+	return &modelList{list: l, nextPage: nextPage}
 }

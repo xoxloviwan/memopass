@@ -10,7 +10,7 @@ import (
 
 type App struct {
 	tui   *tea.Program
-	pages *views.Pages
+	pages tea.Model
 }
 
 func (app *App) Run() error {
@@ -19,12 +19,10 @@ func (app *App) Run() error {
 }
 
 func New(client *iHttp.Client) *App {
-	m := views.InitPages(ctrl.New(client))
-	prg := tea.NewProgram(m, func(pp *tea.Program) {
-		m.Sender = pp
-	})
+	pages := views.InitPages(ctrl.New(client))
+	prg := tea.NewProgram(pages, views.WithSender(pages))
 	return &App{
 		tui:   prg,
-		pages: m,
+		pages: pages,
 	}
 }

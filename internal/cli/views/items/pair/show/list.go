@@ -11,14 +11,13 @@ import (
 
 type modelList struct {
 	list       list.Model
-	ready      bool
 	nextPage   func()
 	allFetched bool
 	// perPage  int
 	Control
 }
 
-func (m modelList) getMoreItems() []list.Item {
+func (m *modelList) getMoreItems() []list.Item {
 	items := []list.Item{}
 	itemsPerPage := m.list.Paginator.PerPage
 	offset := len(m.list.Items())
@@ -37,16 +36,11 @@ func (m modelList) getMoreItems() []list.Item {
 	return items
 }
 
-func (m modelList) Init() tea.Cmd {
+func (m *modelList) Init() tea.Cmd {
 	return m.list.SetItems(m.getMoreItems())
 }
 
-func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if !m.ready {
-		cmd := m.list.SetItems(m.getMoreItems())
-		m.ready = true
-		return m, cmd
-	}
+func (m *modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
@@ -55,7 +49,6 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
 		case "enter":
-			m.ready = false
 			m.nextPage()
 			return m, nil
 		case "down":
@@ -80,6 +73,6 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m modelList) View() string {
+func (m *modelList) View() string {
 	return m.list.View()
 }

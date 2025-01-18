@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/knz/catwalk"
 )
 
@@ -66,20 +65,8 @@ func (c *MockController) GetPairs(limit int, offset int) ([]model.PairInfo, erro
 	}, nil
 }
 
-type PairPageWrapper struct {
-	*pairPage
-}
-
-func (m *PairPageWrapper) Init() tea.Cmd {
-	return nil
-}
-
-func (m *PairPageWrapper) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return m.pairPage.Update(m, msg)
-}
-
 func TestShowPairs(t *testing.T) {
 	// Initialize the model to test.
 	m := NewPage(func() {}, &MockController{})
-	catwalk.RunModel(t, "pairs", &PairPageWrapper{m})
+	catwalk.RunModel(t, "pairs", m)
 }

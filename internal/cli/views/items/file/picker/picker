@@ -4,13 +4,14 @@ run
 Выберите файл:␤
   /c/Projects/gopherkeep␤
 ␤
-  Bummer. No Files Found.␤
-                         ␤
-                         ␤
-                         ␤
-                         ␤
-                         ␤
-                         ␤
-                         ␤
-                         ␤
-                         ␤
+> -rw-rw-rw-   213B picker␤
+  -rw-rw-rw-  2.9kB picker.go␤
+  -rw-rw-rw-   447B picker_test.go␤
+␤
+␤
+␤
+␤
+␤
+␤
+␤
+␤

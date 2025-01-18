@@ -21,11 +21,11 @@ type modelList struct {
 	nextPage    func(int)
 }
 
-func (m modelList) Init() tea.Cmd {
+func (m *modelList) Init() tea.Cmd {
 	return nil
 }
 
-func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
@@ -65,7 +65,7 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m modelList) View() string {
+func (m *modelList) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("Ничего не нужно? Ну пока!")
 	}

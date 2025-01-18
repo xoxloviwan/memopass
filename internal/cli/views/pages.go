@@ -20,9 +20,7 @@ var (
 )
 
 type Page interface {
-	Init(int, int)
-	Update(tea.Model, tea.Msg) (tea.Model, tea.Cmd)
-	View() string
+	tea.Model
 }
 
 type Sender interface {
@@ -61,7 +59,7 @@ func InitPages(ctrl Controller) *Pages {
 			p.currentPage = 1
 		}
 		// fix refresh for list and file picker
-		if (id == 1 || id == 4) && p.Sender != nil {
+		if (id == 1 || id == 4 || id == 7) && p.Sender != nil {
 			go p.Send(new(tea.Msg))
 		}
 		if id == 1 {
@@ -80,6 +78,12 @@ func InitPages(ctrl Controller) *Pages {
 	return &p
 }
 
+func WithSender(pages *Pages) func(*tea.Program) {
+	return func(pp *tea.Program) {
+		pages.Sender = pp
+	}
+}
+
 func (ps *Pages) add(id int, page Page) {
 	ps.pages[id] = page
 }
@@ -95,24 +99,29 @@ func (ps *Pages) nextPage(id int) func() {
 }
 
 func (*Pages) Init() tea.Cmd {
-	return tea.Batch(tea.EnterAltScreen, tea.EnableMouseCellMotion)
+	return tea.Batch(tea.EnterAltScreen)
 }
 
 func (s *Pages) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
+	switch msg.(type) {
 	case tea.WindowSizeMsg:
 		if !ready {
 			ready = true
-			for _, p := range s.pages {
-				if p != nil {
-					p.Init(msg.Width, msg.Height)
-				}
+			p := s.pages[s.currentPage]
+			if p != nil {
+				p.Init()
 			}
 		}
 	}
+	lastPage := s.currentPage
+	_, cmd := s.pages[s.currentPage].Update(msg)
 
-	model, cmd := s.pages[s.currentPage].Update(s, msg)
-	return model, cmd
+	if s.currentPage != lastPage {
+		cmd = tea.Batch(cmd, s.pages[s.currentPage].Init())
+
+	}
+	// fmt.Println(s.currentPage, "Pages")
+	return s, cmd
 }
 
 func (s *Pages) View() string {

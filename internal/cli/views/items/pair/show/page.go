@@ -5,8 +5,6 @@ import (
 	"iwakho/gopherkeep/internal/model"
 
 	"github.com/charmbracelet/bubbles/list"
-
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 var (
@@ -32,29 +30,10 @@ type Control interface {
 	GetPairs(int, int) ([]model.PairInfo, error)
 }
 
-type pairPage struct {
-	Model  modelList
-	width  int
-	height int
-}
-
-func NewPage(nextPage func(), ctrl Control) *pairPage {
-	return &pairPage{modelList{
+func NewPage(nextPage func(), ctrl Control) *modelList {
+	return &modelList{
 		list:     listModel(),
 		nextPage: nextPage,
 		Control:  ctrl,
-	}, 0, 0}
-}
-
-func (pp *pairPage) Init(width, height int) {
-	pp.width = width
-}
-func (pp *pairPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
-	model, cmd := pp.Model.Update(msg)
-	pp.Model = model.(modelList)
-	return m, cmd
-}
-
-func (pp *pairPage) View() string {
-	return pp.Model.View()
+	}
 }
