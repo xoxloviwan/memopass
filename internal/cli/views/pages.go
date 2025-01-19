@@ -4,11 +4,14 @@ import (
 	msgs "iwakho/gopherkeep/internal/cli/messages"
 	addCard "iwakho/gopherkeep/internal/cli/views/items/creditcard/add"
 	showCards "iwakho/gopherkeep/internal/cli/views/items/creditcard/show"
+	listFiles "iwakho/gopherkeep/internal/cli/views/items/file/list"
 	"iwakho/gopherkeep/internal/cli/views/items/file/picker"
+	addFile "iwakho/gopherkeep/internal/cli/views/items/file/picker"
+	addText "iwakho/gopherkeep/internal/cli/views/items/note/add"
+	listTexts "iwakho/gopherkeep/internal/cli/views/items/note/list"
+	showText "iwakho/gopherkeep/internal/cli/views/items/note/show"
 	addPair "iwakho/gopherkeep/internal/cli/views/items/pair/add"
 	showPairs "iwakho/gopherkeep/internal/cli/views/items/pair/show"
-	addText "iwakho/gopherkeep/internal/cli/views/items/textarea/add"
-	showTexts "iwakho/gopherkeep/internal/cli/views/items/textarea/show"
 	"iwakho/gopherkeep/internal/cli/views/login"
 	"iwakho/gopherkeep/internal/cli/views/menu"
 
@@ -45,12 +48,14 @@ type Controller interface {
 	showPairs.Control
 	showCards.Control
 	addText.Control
+	listTexts.Control
+	listFiles.Control
 }
 
 const offset = 2
 
 func InitPages(ctrl Controller) *Pages {
-	const pageTotal = 10
+	const pageTotal = 11
 	p := Pages{
 		pages: make([]Page, pageTotal),
 	}
@@ -67,11 +72,12 @@ func InitPages(ctrl Controller) *Pages {
 	p.add(offset+0, addPair.NewPage(1, ctrl))
 	p.add(offset+1, showPairs.NewPage(1, ctrl))
 	p.add(offset+2, addText.NewPage(1, ctrl))
-	p.add(offset+3, showTexts.NewPage(1))
-	p.add(offset+4, picker.NewPage(1, ctrl))
-	p.add(offset+5, p.get(1)) // TODO file download
+	p.add(offset+3, listTexts.NewPage(offset+8, ctrl))
+	p.add(offset+4, addFile.NewPage(1, ctrl))
+	p.add(offset+5, listFiles.NewPage(1, ctrl))
 	p.add(offset+6, addCard.NewPage(1, ctrl))
 	p.add(offset+7, showCards.NewPage(1, ctrl))
+	p.add(offset+8, showText.NewPage(1))
 
 	return &p
 }
@@ -84,10 +90,6 @@ func WithSender(pages *Pages) func(*tea.Program) {
 
 func (ps *Pages) add(id int, page Page) {
 	ps.pages[id] = page
-}
-
-func (ps *Pages) get(id int) Page {
-	return ps.pages[id]
 }
 
 func (*Pages) Init() tea.Cmd {

@@ -5,6 +5,7 @@ import (
 	iHttp "iwakho/gopherkeep/internal/cli/http"
 	"iwakho/gopherkeep/internal/model"
 	"os"
+	"time"
 )
 
 type Controller struct {
@@ -85,4 +86,60 @@ func (c *Controller) AddText(text string) error {
 		return err
 	}
 	return c.cli.AddItem(c.cli.Add.Text, body, header)
+}
+
+func (c *Controller) GetTexts(limit int, offset int) ([]model.FileInfo, error) {
+	return []model.FileInfo{
+		{
+			File: model.File{
+				Name: "some file",
+				Blob: []byte("some text"),
+				ID:   1,
+			},
+			Metainfo: model.Metainfo{
+				Date: time.Now(),
+			},
+		},
+		{
+			File: model.File{
+				Name: "some file",
+				Blob: []byte("some text"),
+				ID:   3,
+			},
+			Metainfo: model.Metainfo{
+				Date: time.Now(),
+			},
+		},
+	}, nil
+}
+
+func (c *Controller) GetFiles(limit int, offset int) ([]model.FileInfo, error) {
+	return []model.FileInfo{
+		{
+			File: model.File{
+				Name: "some file",
+				ID:   1,
+			},
+			Metainfo: model.Metainfo{
+				Date: time.Now(),
+			},
+		},
+		{
+			File: model.File{
+				Name: "some file",
+				ID:   3,
+			},
+			Metainfo: model.Metainfo{
+				Date: time.Now(),
+			},
+		},
+	}, nil
+}
+
+func (c *Controller) GetFileById(id int) error {
+	return nil
+}
+
+func (c *Controller) GetTextById(id int) (string, error) {
+	return "some file", nil
 }
