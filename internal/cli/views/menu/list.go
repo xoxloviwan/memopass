@@ -1,7 +1,7 @@
 package menu
 
 import (
-	"iwakho/gopherkeep/internal/cli/views/basics/item"
+	iList "iwakho/gopherkeep/internal/cli/views/basics/list"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -38,7 +38,7 @@ func (m *modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "enter":
-			i, ok := m.list.SelectedItem().(item.Item)
+			i, ok := m.list.SelectedItem().(iList.Item)
 			if ok {
 				if m.list.Title == mainTitle {
 					m.takenItemID = m.list.Index()*2 + 1

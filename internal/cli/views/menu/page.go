@@ -1,7 +1,7 @@
 package menu
 
 import (
-	"iwakho/gopherkeep/internal/cli/views/basics/item"
+	item "iwakho/gopherkeep/internal/cli/views/basics/list"
 
 	"github.com/charmbracelet/bubbles/list"
 )

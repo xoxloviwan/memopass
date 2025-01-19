@@ -58,13 +58,6 @@ func InitPages(ctrl Controller) *Pages {
 		} else {
 			p.currentPage = 1
 		}
-		// fix refresh for list and file picker
-		if (id == 1 || id == 4 || id == 7) && p.Sender != nil {
-			go p.Send(new(tea.Msg))
-		}
-		if id == 1 {
-			p.add(offset+id, showPairs.NewPage(p.nextPage(1), ctrl)) // reset list
-		}
 	}))
 	p.add(offset+0, addPair.NewPage(p.nextPage(1), ctrl))
 	p.add(offset+1, showPairs.NewPage(p.nextPage(1), ctrl))

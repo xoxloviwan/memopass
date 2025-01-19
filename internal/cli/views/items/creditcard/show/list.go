@@ -2,31 +2,29 @@ package show
 
 import (
 	"fmt"
+	"iwakho/gopherkeep/internal/cli/views/basics/list"
+	"iwakho/gopherkeep/internal/model"
 
-	"iwakho/gopherkeep/internal/cli/views/basics/item"
-
-	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type modelList struct {
-	list       list.Model
-	nextPage   func()
-	allFetched bool
+type Control interface {
+	GetCards(int, int) ([]model.CardInfo, error)
+}
+
+type CardFetcher struct {
 	Control
 }
 
-func (m *modelList) getMoreItems() []list.Item {
+func (f CardFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 	items := []list.Item{}
-	itemsPerPage := m.list.Paginator.PerPage
-	offset := len(m.list.Items())
-	cards, err := m.GetCards(itemsPerPage, offset)
+	cards, err := f.GetCards(itemsPerPage, offset)
 	if err != nil {
-		return []list.Item{item.Item{Title: "Ошибка", Description: err.Error()}}
+		return []list.Item{{Title: "Ошибка", Description: err.Error()}}
 	}
 
 	for _, v := range cards {
-		item := item.Item{
+		item := list.Item{
 			Title:       v.Date.Local().String(),
 			Description: fmt.Sprintf("\tНомер: %s\n\tДействует до: %s\n\tCVV: %s", v.Number, v.Exp, v.VerifVal),
 		}
@@ -35,43 +33,9 @@ func (m *modelList) getMoreItems() []list.Item {
 	return items
 }
 
-func (m *modelList) Init() tea.Cmd {
-	return m.list.SetItems(m.getMoreItems())
-}
-
-func (m *modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.list.SetWidth(msg.Width)
-		return m, nil
-
-	case tea.KeyMsg:
-		switch keypress := msg.String(); keypress {
-		case "enter":
-			m.nextPage()
-			return m, nil
-		case "down":
-			if m.list.Paginator.OnLastPage() && m.list.Index() == len(m.list.Items())-1 && !m.allFetched {
-				items := m.list.Items()
-				newItems := m.getMoreItems()
-				if len(newItems) == 0 {
-					m.allFetched = true
-					return m, nil
-				}
-				items = append(items, newItems...)
-				cmd := m.list.SetItems(items)
-				var cmd2 tea.Cmd
-				m.list, cmd2 = m.list.Update(msg)
-				return m, tea.Batch(cmd, cmd2)
-			}
-		}
-	}
-
-	var cmd tea.Cmd
-	m.list, cmd = m.list.Update(msg)
-	return m, cmd
-}
-
-func (m *modelList) View() string {
-	return m.list.View()
+func NewPage(nextPage func(), ctrl Control) tea.Model {
+	return list.New(
+		"Посмотреть карты",
+		&CardFetcher{Control: ctrl},
+		nextPage)
 }
