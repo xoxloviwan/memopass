@@ -94,6 +94,22 @@ func (mr *MockStoreMockRecorder) GetCards(arg0, arg1, arg2, arg3 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCards", reflect.TypeOf((*MockStore)(nil).GetCards), arg0, arg1, arg2, arg3)
 }
 
+// GetFileById mocks base method.
+func (m *MockStore) GetFileById(arg0 context.Context, arg1, arg2 int, arg3 bool) ([]byte, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFileById", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetFileById indicates an expected call of GetFileById.
+func (mr *MockStoreMockRecorder) GetFileById(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFileById", reflect.TypeOf((*MockStore)(nil).GetFileById), arg0, arg1, arg2, arg3)
+}
+
 // GetFiles mocks base method.
 func (m *MockStore) GetFiles(arg0 context.Context, arg1, arg2, arg3 int, arg4 bool) ([]model.FileInfo, error) {
 	m.ctrl.T.Helper()

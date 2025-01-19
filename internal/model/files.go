@@ -11,6 +11,7 @@ import (
 type File struct {
 	Name string `json:"name"`
 	Blob []byte `json:"blob"`
+	ID   int    `json:"id"`
 }
 
 type FileInfo struct {

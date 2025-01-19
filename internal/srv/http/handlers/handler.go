@@ -18,6 +18,7 @@ type Store interface {
 	AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader, isBinary bool) error
 	AddCard(ctx context.Context, userID int, card model.CardInfo) error
 	GetFiles(ctx context.Context, userID int, limit int, offset int, isBinary bool) ([]model.FileInfo, error)
+	GetFileById(ctx context.Context, userID int, id int, isBinary bool) (data []byte, name string, err error)
 	GetCards(ctx context.Context, userID int, limit int, offset int) ([]model.CardInfo, error)
 }
 

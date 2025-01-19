@@ -45,7 +45,9 @@ func (rr *Router) SetupRoutes(h *handlers.Handler) http.Handler {
 	getGroup.HandleFunc("GET /pairs", h.GetPairs)
 	getGroup.HandleFunc("GET /cards", h.GetCards)
 	getGroup.HandleFunc("GET /files", h.GetBinaries)
+	getGroup.HandleFunc("GET /file/", h.GetBinaryById)
 	getGroup.HandleFunc("GET /texts", h.GetTexts)
+	getGroup.HandleFunc("GET /text/", h.GetTextById)
 
 	return router
 }

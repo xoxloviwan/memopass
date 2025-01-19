@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"iwakho/gopherkeep/internal/model"
+	"iwakho/gopherkeep/internal/srv/errs"
 	"mime/multipart"
 	"time"
 
@@ -165,7 +166,8 @@ func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset i
 				name,
 				file,
 				date,
-				meta
+				meta,
+				id
 			FROM files
 			WHERE user_id = @user_id and binary = @binary ORDER BY date DESC LIMIT @limit OFFSET @offset`,
 		sql.Named("user_id", userID),
@@ -180,7 +182,7 @@ func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset i
 	for rows.Next() {
 		file := model.FileInfo{}
 		var meta sql.NullString
-		err = rows.Scan(&file.Name, &file.Blob, &file.Date, &meta)
+		err = rows.Scan(&file.Name, &file.Blob, &file.Date, &meta, &file.ID)
 		if err != nil {
 			return files, err
 		}
@@ -221,4 +223,15 @@ func (db *Storage) GetCards(ctx context.Context, userID int, limit int, offset i
 	}
 
 	return cards, nil
+}
+
+func (db *Storage) GetFileById(ctx context.Context, userID int, id int, isBinary bool) (data []byte, name string, err error) {
+	err = db.QueryRowContext(ctx, "SELECT file, name FROM files WHERE user_id = @user_id and id = @id and binary = @binary", sql.Named("user_id", userID), sql.Named("id", id), sql.Named("binary", isBinary)).Scan(&data, &name)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, "", errs.ErrNotFound
+		}
+		return nil, "", err
+	}
+	return data, name, nil
 }

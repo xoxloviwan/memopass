@@ -2,8 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"iwakho/gopherkeep/internal/model"
+	"iwakho/gopherkeep/internal/srv/errs"
 	"net/http"
+	"strconv"
 )
 
 const (
@@ -76,6 +80,52 @@ func (h *Handler) getFiles(w http.ResponseWriter, r *http.Request, isBinary bool
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(resp)
+	if err != nil {
+		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handler) GetBinaryById(w http.ResponseWriter, r *http.Request) {
+	h.getFileById(w, r, true)
+}
+
+func (h *Handler) GetTextById(w http.ResponseWriter, r *http.Request) {
+	h.getFileById(w, r, false)
+}
+
+func (h *Handler) getFileById(w http.ResponseWriter, r *http.Request, isBinary bool) {
+	rCtx := r.Context()
+	userID := rCtx.Value(model.UserIDCtxKey{}).(int)
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		h.ErrorWithLog(w, "query param id is empty", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		h.ErrorWithLog(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	file, name, err := h.store.GetFileById(rCtx, userID, id, isBinary)
+	if err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			h.ErrorWithLog(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	contentType := "text/plain"
+	if isBinary {
+		contentType = "application/octet-stream"
+	}
+	w.Header().Set("Content-Type", contentType)
+	if name != "" {
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, name))
+	}
+	_, err = w.Write(file)
 	if err != nil {
 		h.ErrorWithLog(w, err.Error(), http.StatusInternalServerError)
 		return
