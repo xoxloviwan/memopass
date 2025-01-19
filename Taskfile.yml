@@ -23,6 +23,7 @@ tasks:
   build:
     desc: Build all
     cmds:
+      - go mod tidy
       - task: lint
       - task: cover
       - task: build_cli
