@@ -1,6 +1,7 @@
 package menu
 
 import (
+	msgs "iwakho/gopherkeep/internal/cli/messages"
 	iList "iwakho/gopherkeep/internal/cli/views/basics/list"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -18,7 +19,7 @@ type modelList struct {
 	list        list.Model
 	takenItemID int
 	quitting    bool
-	nextPage    func(int)
+	nextPage    func(int) int
 }
 
 func (m *modelList) Init() tea.Cmd {
@@ -46,9 +47,9 @@ func (m *modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else if m.takenItemID > 0 {
 					switch i.Title {
 					case AddItem:
-						m.nextPage(m.takenItemID - 1)
+						return m, msgs.NextPageCmd(m.nextPage(m.takenItemID-1), nil)
 					case ShowItem:
-						m.nextPage(m.takenItemID)
+						return m, msgs.NextPageCmd(m.nextPage(m.takenItemID), nil)
 					default:
 						m.list = listModel(mainItems())
 					}

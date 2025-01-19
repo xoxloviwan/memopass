@@ -4,7 +4,7 @@ import (
 	"iwakho/gopherkeep/internal/cli/views/basics/form"
 )
 
-func InitLogin(nextPage func(), ctrl Control) modelForm {
+func InitLogin(nextPage int, ctrl Control) modelForm {
 	fc := form.FormCaller{
 		FormName:    "Вход",
 		InputNames:  []string{"Логин", "Пароль"},
@@ -15,7 +15,7 @@ func InitLogin(nextPage func(), ctrl Control) modelForm {
 	return *m
 }
 
-func InitSignUp(nextPage func(), ctrl Control) modelForm {
+func InitSignUp(nextPage int, ctrl Control) modelForm {
 	fc := form.FormCaller{
 		FormName: "Регистрация",
 		InputNames: []string{

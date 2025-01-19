@@ -14,6 +14,6 @@ func (c *MockController) AddText(string) error {
 
 func TestTextArea(t *testing.T) {
 	// Initialize the model to test.
-	m := NewPage(func() {}, &MockController{})
+	m := NewPage(0, &MockController{})
 	catwalk.RunModel(t, "textarea", m)
 }

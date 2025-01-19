@@ -69,6 +69,6 @@ func (c *MockController) GetPairs(limit int, offset int) ([]model.PairInfo, erro
 
 func TestShowPairs(t *testing.T) {
 	// Initialize the model to test.
-	m := NewPage(func() {}, &MockController{})
+	m := NewPage(0, &MockController{})
 	catwalk.RunModel(t, "pairs", m)
 }

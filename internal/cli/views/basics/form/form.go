@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	msgs "iwakho/gopherkeep/internal/cli/messages"
 	btn "iwakho/gopherkeep/internal/cli/views/basics/button"
 	"iwakho/gopherkeep/internal/model"
 
@@ -27,7 +28,7 @@ type ModelForm struct {
 	Name        string
 	focusIndex  int
 	inputs      []textinput.Model
-	NextPage    func()
+	NextPage    int
 	buttons     []string
 	indexMax    int
 	failMessage string
@@ -118,17 +119,11 @@ func (m *ModelForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.failMessage = err.Error()
 					return m, nil
 				}
-				if m.NextPage != nil {
-					m.NextPage()
-				}
-				return m, nil
+				return m, msgs.NextPageCmd(m.NextPage, nil)
 			}
 
 			if s == "enter" && m.focusIndex == len(m.inputs)+1 { // back
-				if m.NextPage != nil {
-					m.NextPage()
-				}
-				return m, nil
+				return m, msgs.NextPageCmd(m.NextPage, nil)
 			}
 
 			// Cycle indexes

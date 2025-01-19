@@ -31,7 +31,7 @@ type model struct {
 	content  string
 	ready    bool
 	viewport viewport.Model
-	nextPage func()
+	nextPage int
 }
 
 func (m *model) Init() tea.Cmd {
@@ -104,7 +104,7 @@ func max(a, b int) int {
 	return b
 }
 
-func NewPage(nextPage func()) *model {
+func NewPage(nextPage int) *model {
 	content, err := os.ReadFile("Taskfile.yml")
 	if err != nil {
 		return &model{content: fmt.Sprintln("could not load file:", err), nextPage: nextPage}

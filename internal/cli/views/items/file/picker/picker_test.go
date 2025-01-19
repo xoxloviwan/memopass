@@ -15,7 +15,7 @@ func (c *MockController) AddFile(string) error {
 }
 
 func NewPickerPageWrapper() *modelPicker {
-	mp := newModelPicker(func() {}, &MockController{})
+	mp := newModelPicker(0, &MockController{})
 	mp.testMode = true
 	return mp
 }

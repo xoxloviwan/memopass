@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"iwakho/gopherkeep/internal/model"
 
+	msgs "iwakho/gopherkeep/internal/cli/messages"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -37,11 +39,11 @@ type modelCard struct {
 	inputs   []textinput.Model
 	focused  int
 	err      error
-	nextPage func()
+	nextPage int
 	Control
 }
 
-func newModelCard(nextPage func(), ctrl Control) *modelCard {
+func newModelCard(nextPage int, ctrl Control) *modelCard {
 	var inputs []textinput.Model = make([]textinput.Model, 3)
 	inputs[ccn] = textinput.New()
 	inputs[ccn].Placeholder = "4505 **** **** 1234"
@@ -74,7 +76,7 @@ func newModelCard(nextPage func(), ctrl Control) *modelCard {
 	}
 }
 
-func NewPage(nextPage func(), ctrl Control) *modelCard {
+func NewPage(nextPage int, ctrl Control) *modelCard {
 	return newModelCard(nextPage, ctrl)
 }
 
@@ -103,8 +105,7 @@ func (m *modelCard) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				return m, nil
 			}
-			m.nextPage()
-			return m, nil
+			return m, msgs.NextPageCmd(m.nextPage, nil)
 		case tea.KeyCtrlC, tea.KeyEsc:
 			return m, tea.Quit
 		case tea.KeyShiftTab, tea.KeyCtrlP:
