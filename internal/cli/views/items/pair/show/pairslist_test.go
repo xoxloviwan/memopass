@@ -9,6 +9,8 @@ import (
 	"github.com/knz/catwalk"
 )
 
+//go:generate go test . -args -rewrite
+
 type MockController struct {
 	cnt int
 }
