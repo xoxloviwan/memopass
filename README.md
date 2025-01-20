@@ -24,6 +24,15 @@ _This is my study project on Go._
 
 For troubleshouting see [taskfile.yml](./taskfile.yml) and install same for your OS.
 
+## Run checks and get coverage:
+
+  ```bash
+  task lint
+  task cover # count coverage
+  task coverv # open html coverage report in browser
+  ```
+
+
 ## Usage
 
 ### Server
