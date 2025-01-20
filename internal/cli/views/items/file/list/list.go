@@ -10,7 +10,6 @@ import (
 
 type Control interface {
 	GetFiles(int, int) ([]model.FileInfo, error)
-	GetFileById(int) (*model.File, error)
 }
 
 type FileFetcher struct {
@@ -26,6 +25,7 @@ func (f FileFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 
 	for _, v := range files {
 		item := list.Item{
+			ID:          v.ID,
 			Title:       v.Date.Local().String(),
 			Description: fmt.Sprintf("\tФайл: %s", v.Name),
 		}

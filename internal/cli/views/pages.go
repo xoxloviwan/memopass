@@ -7,6 +7,7 @@ import (
 	listFiles "iwakho/gopherkeep/internal/cli/views/items/file/list"
 	"iwakho/gopherkeep/internal/cli/views/items/file/picker"
 	addFile "iwakho/gopherkeep/internal/cli/views/items/file/picker"
+	getFile "iwakho/gopherkeep/internal/cli/views/items/file/saver"
 	addText "iwakho/gopherkeep/internal/cli/views/items/note/add"
 	listTexts "iwakho/gopherkeep/internal/cli/views/items/note/list"
 	showText "iwakho/gopherkeep/internal/cli/views/items/note/show"
@@ -51,12 +52,13 @@ type Controller interface {
 	listTexts.Control
 	listFiles.Control
 	showText.Control
+	getFile.Control
 }
 
 const offset = 2
 
 func InitPages(ctrl Controller) *Pages {
-	const pageTotal = 11
+	const pageTotal = 12
 	p := Pages{
 		pages: make([]Page, pageTotal),
 	}
@@ -75,10 +77,11 @@ func InitPages(ctrl Controller) *Pages {
 	p.add(offset+2, addText.NewPage(1, ctrl))
 	p.add(offset+3, listTexts.NewPage(offset+8, ctrl))
 	p.add(offset+4, addFile.NewPage(1, ctrl))
-	p.add(offset+5, listFiles.NewPage(1, ctrl))
+	p.add(offset+5, listFiles.NewPage(offset+9, ctrl))
 	p.add(offset+6, addCard.NewPage(1, ctrl))
 	p.add(offset+7, showCards.NewPage(1, ctrl))
 	p.add(offset+8, showText.NewPage(1, ctrl))
+	p.add(offset+9, getFile.NewPage(1, ctrl, p.Sender))
 
 	return &p
 }
