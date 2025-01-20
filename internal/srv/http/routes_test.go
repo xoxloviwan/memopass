@@ -307,6 +307,14 @@ func Test_GetFileByID(t *testing.T) {
 				code: http.StatusOK,
 			},
 		},
+		{
+			name:   "success",
+			url:    "/api/v1/item/text/?id=1",
+			method: http.MethodGet,
+			want: want{
+				code: http.StatusOK,
+			},
+		},
 	}
 	router, db := setup(t)
 

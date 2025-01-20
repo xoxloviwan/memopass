@@ -86,12 +86,6 @@ func InitPages(ctrl Controller) *Pages {
 	return &p
 }
 
-func WithSender(pages *Pages) func(*tea.Program) {
-	return func(pp *tea.Program) {
-		pages.Sender = pp
-	}
-}
-
 func (ps *Pages) add(id int, page Page) {
 	ps.pages[id] = page
 }

@@ -20,7 +20,7 @@ func (app *App) Run() error {
 
 func New(client *iHttp.Client) *App {
 	pages := views.InitPages(ctrl.New(client))
-	prg := tea.NewProgram(pages, views.WithSender(pages))
+	prg := tea.NewProgram(pages)
 	return &App{
 		tui:   prg,
 		pages: pages,
