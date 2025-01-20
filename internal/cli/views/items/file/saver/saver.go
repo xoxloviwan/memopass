@@ -14,27 +14,21 @@ type Control interface {
 	GetFileById(id int) (*md.File, error)
 }
 
-type Sender interface {
-	Send(msg tea.Msg)
-}
-
 type model struct {
 	path      string
 	savedPath string
 	err       string
 	Control
-	Sender
 	nextPage int
 	cnt      int
 }
 
-func NewPage(nextPage int, ctrl Control, s Sender) *model {
+func NewPage(nextPage int, ctrl Control) *model {
 	return &model{
 		path:      os.TempDir(),
 		savedPath: "",
 		nextPage:  nextPage,
 		Control:   ctrl,
-		Sender:    s,
 	}
 }
 

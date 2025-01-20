@@ -81,7 +81,7 @@ func InitPages(ctrl Controller) *Pages {
 	p.add(offset+6, addCard.NewPage(1, ctrl))
 	p.add(offset+7, showCards.NewPage(1, ctrl))
 	p.add(offset+8, showText.NewPage(1, ctrl))
-	p.add(offset+9, getFile.NewPage(1, ctrl, p.Sender))
+	p.add(offset+9, getFile.NewPage(1, ctrl))
 
 	return &p
 }
