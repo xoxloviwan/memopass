@@ -1,1 +1,2 @@
 DROP TABLE IF EXISTS pairs;
+DROP INDEX IF EXISTS pairs_user_id_idx;

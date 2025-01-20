@@ -1,23 +1,21 @@
 package login
 
 import (
-	ctrl "iwakho/gopherkeep/internal/cli/controls"
 	"iwakho/gopherkeep/internal/cli/views/basics/form"
 )
 
-func InitLogin(nextPage func()) modelForm {
+func InitLogin(nextPage func(), ctrl Control) modelForm {
 	fc := form.FormCaller{
 		FormName:    "Вход",
 		InputNames:  []string{"Логин", "Пароль"},
 		ButtonNames: []string{"Войти"},
 	}
-	m := form.InitForm(&fc)
+	m := form.InitForm(&fc, ctrl.Login)
 	m.NextPage = nextPage
-	m.Control = new(ctrl.LoginCtrl)
 	return *m
 }
 
-func InitSignUp(nextPage func()) modelForm {
+func InitSignUp(nextPage func(), ctrl Control) modelForm {
 	fc := form.FormCaller{
 		FormName: "Регистрация",
 		InputNames: []string{
@@ -27,8 +25,7 @@ func InitSignUp(nextPage func()) modelForm {
 		},
 		ButtonNames: []string{"Зарегистрироваться"},
 	}
-	m := form.InitForm(&fc)
+	m := form.InitForm(&fc, ctrl.SignUp)
 	m.NextPage = nextPage
-	m.Control = new(ctrl.SignUpCtrl)
 	return *m
 }

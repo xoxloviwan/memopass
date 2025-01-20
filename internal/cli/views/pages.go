@@ -1,9 +1,12 @@
 package views
 
 import (
+	addCard "iwakho/gopherkeep/internal/cli/views/items/creditcard/add"
+	showCards "iwakho/gopherkeep/internal/cli/views/items/creditcard/show"
 	"iwakho/gopherkeep/internal/cli/views/items/file/picker"
 	addPair "iwakho/gopherkeep/internal/cli/views/items/pair/add"
 	showPairs "iwakho/gopherkeep/internal/cli/views/items/pair/show"
+	addText "iwakho/gopherkeep/internal/cli/views/items/textarea/add"
 	"iwakho/gopherkeep/internal/cli/views/login"
 	"iwakho/gopherkeep/internal/cli/views/menu"
 
@@ -16,80 +19,107 @@ var (
 	ready bool
 )
 
-const pageTotal = 7
-
-var currentPage = 0
-
 type Page interface {
-	Init(int, int)
-	Update(tea.Model, tea.Msg) (tea.Model, tea.Cmd)
-	View() string
+	tea.Model
 }
 
 type Sender interface {
 	Send(tea.Msg)
 }
 
-type App struct {
-	pages []Page
+type Pages struct {
+	pages       []Page
+	currentPage int
 	Sender
 }
 
-func nextPage(id int) func() {
-	return func() {
-		currentPage = id
+type Controller interface {
+	login.Control
+	addPair.Control
+	addCard.Control
+	picker.Control
+	showPairs.Control
+	showCards.Control
+	addText.Control
+}
+
+func InitPages(ctrl Controller) *Pages {
+	const pageTotal = 10
+	p := Pages{
+		pages: make([]Page, pageTotal),
+	}
+	const offset = 2
+
+	p.add(0, login.NewPage(p.nextPage(1), ctrl))
+	p.add(1, menu.NewPage(func(id int) {
+		nextPage := id + offset
+		if nextPage < pageTotal {
+			p.currentPage = nextPage
+		} else {
+			p.currentPage = 1
+		}
+	}))
+	p.add(offset+0, addPair.NewPage(p.nextPage(1), ctrl))
+	p.add(offset+1, showPairs.NewPage(p.nextPage(1), ctrl))
+	p.add(offset+2, addText.NewPage(p.nextPage(1), ctrl))
+	p.add(offset+3, p.get(1)) // TODO text viewer
+	p.add(offset+4, picker.NewPage(p.nextPage(1), ctrl))
+	p.add(offset+5, p.get(1)) // TODO file download
+	p.add(offset+6, addCard.NewPage(p.nextPage(1), ctrl))
+	p.add(offset+7, showCards.NewPage(p.nextPage(1), ctrl))
+
+	return &p
+}
+
+func WithSender(pages *Pages) func(*tea.Program) {
+	return func(pp *tea.Program) {
+		pages.Sender = pp
 	}
 }
 
-func NewApp() (*App, error) {
-	app := App{pages: make([]Page, pageTotal)}
-
-	const offset = 2
-	app.pages[0] = login.NewPage(nextPage(1))
-
-	app.pages[1] = menu.NewPage(func(id int) {
-		nextPage := id + offset
-		if nextPage < pageTotal {
-			currentPage = nextPage
-		} else {
-			currentPage = 1
-		}
-		// fix refresh for list and file picker
-		if (id == 1 || id == 4) && app.Sender != nil {
-			go app.Sender.Send(new(tea.Msg))
-		}
-	})
-	app.pages[offset+0] = addPair.NewPage(nextPage(1))
-	app.pages[offset+1] = showPairs.NewPage(nextPage(1))
-	app.pages[offset+4] = picker.NewPage(nextPage(1))
-
-	return &app, nil
+func (ps *Pages) add(id int, page Page) {
+	ps.pages[id] = page
 }
 
-func (s App) Init() tea.Cmd {
-	return tea.Batch(tea.EnterAltScreen, tea.EnableMouseCellMotion)
+func (ps *Pages) get(id int) Page {
+	return ps.pages[id]
 }
 
-func (s App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
+func (ps *Pages) nextPage(id int) func() {
+	return func() {
+		ps.currentPage = id
+	}
+}
+
+func (*Pages) Init() tea.Cmd {
+	return tea.Batch(tea.EnterAltScreen)
+}
+
+func (s *Pages) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg.(type) {
 	case tea.WindowSizeMsg:
 		if !ready {
 			ready = true
-			for _, p := range s.pages {
-				if p != nil {
-					p.Init(msg.Width, msg.Height)
-				}
+			p := s.pages[s.currentPage]
+			if p != nil {
+				p.Init()
 			}
 		}
 	}
+	lastPage := s.currentPage
+	_, cmd := s.pages[s.currentPage].Update(msg)
 
-	model, cmd := s.pages[currentPage].Update(s, msg)
-	return model, cmd
+	if s.currentPage != lastPage {
+		cmd = tea.Batch(cmd, s.pages[s.currentPage].Init())
+
+	}
+	// fmt.Println(s.currentPage, "Pages")
+	return s, cmd
 }
 
-func (s App) View() string {
+func (s *Pages) View() string {
 	if !ready {
 		return "\n  Initializing..."
 	}
-	return s.pages[currentPage].View()
+	return s.pages[s.currentPage].View()
 }

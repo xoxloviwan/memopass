@@ -3,6 +3,7 @@ package login
 import (
 	"fmt"
 	"iwakho/gopherkeep/internal/cli/views/basics/form"
+	"iwakho/gopherkeep/internal/model"
 	"sort"
 	"strings"
 
@@ -46,16 +47,18 @@ type AuthPage struct {
 	activatedTab int
 	Tabs         map[int]Tab
 	TabContent   []modelForm
-
-	width  int
-	height int
 }
 
-func NewPage(onEnter func()) *AuthPage {
+type Control interface {
+	Login(p model.Pair) error
+	SignUp(p model.Pair) error
+}
+
+func NewPage(onEnter func(), ctrl Control) *AuthPage {
 	ap := AuthPage{
 		TabContent: []modelForm{
-			InitLogin(onEnter),
-			InitSignUp(onEnter),
+			InitLogin(onEnter, ctrl),
+			InitSignUp(onEnter, ctrl),
 		},
 		Tabs: make(map[int]Tab),
 	}
@@ -65,36 +68,36 @@ func NewPage(onEnter func()) *AuthPage {
 	return &ap
 }
 
-func (ap *AuthPage) Init(width, height int) {
-	ap.width = width
+func (ap *AuthPage) Init() tea.Cmd {
+	return nil
 }
 
-func (ap *AuthPage) Update(m tea.Model, msg tea.Msg) (tea.Model, tea.Cmd) {
+func (ap *AuthPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
 			fmt.Println("AuthPage Exiting...")
-			return m, tea.Quit
+			return ap, tea.Quit
 		case "left":
 			if ap.activatedTab < len(ap.Tabs)-1 {
 				ap.activatedTab++
 			} else {
 				ap.activatedTab--
 			}
-			return m, nil
+			return ap, nil
 		case "right":
 			if ap.activatedTab > 0 {
 				ap.activatedTab--
 			} else {
 				ap.activatedTab++
 			}
-			return m, nil
+			return ap, nil
 		}
 	}
 	tabModel, cmd := ap.TabContent[ap.activatedTab].Update(msg)
 	ap.TabContent[ap.activatedTab] = *tabModel.(*modelForm)
-	return m, cmd
+	return ap, cmd
 }
 
 // renderTabs will create the view for the tabs
@@ -136,7 +139,7 @@ func (ap *AuthPage) renderTabs() string {
 	return row
 }
 
-func (ap AuthPage) View() string {
+func (ap *AuthPage) View() string {
 	doc := strings.Builder{}
 
 	// Tabs

@@ -8,13 +8,17 @@ import (
 	"net/http"
 )
 
+//go:generate mockgen -destination ./mockstore/mock_store.go -package mockstore . Store
+
 type Store interface {
 	NewUser(ctx context.Context, user model.User) (int, error)
 	GetUser(ctx context.Context, username string) (*model.User, error)
-	AddNewPair(ctx context.Context, userID int, pair model.PairInfo) error
+	AddPair(ctx context.Context, userID int, pair model.PairInfo) error
 	GetPairs(ctx context.Context, userID int, limit int, offset int) ([]model.PairInfo, error)
-	GetFiles(ctx context.Context, userID int, limit int, offset int) ([]model.FileInfo, error)
-	AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader) error
+	AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader, isBinary bool) error
+	AddCard(ctx context.Context, userID int, card model.CardInfo) error
+	GetFiles(ctx context.Context, userID int, limit int, offset int, isBinary bool) ([]model.FileInfo, error)
+	GetCards(ctx context.Context, userID int, limit int, offset int) ([]model.CardInfo, error)
 }
 
 type logger interface {
@@ -34,7 +38,7 @@ func NewHandler(store Store, logger logger) *Handler {
 	}
 }
 
-func (h Handler) ErrorWithLog(w http.ResponseWriter, err string, code int) {
-	h.logger.Error(err, "request_id", w.Header().Get("X-Request-ID"))
+func (h *Handler) ErrorWithLog(w http.ResponseWriter, err string, code int) {
+	h.logger.Error(err)
 	http.Error(w, err, code)
 }

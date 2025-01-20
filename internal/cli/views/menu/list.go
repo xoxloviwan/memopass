@@ -1,7 +1,7 @@
 package menu
 
 import (
-	"iwakho/gopherkeep/internal/cli/views/basics/item"
+	iList "iwakho/gopherkeep/internal/cli/views/basics/list"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -14,24 +14,18 @@ var (
 	quitTextStyle = lipgloss.NewStyle().Margin(1, 0, 2, 4)
 )
 
-type choice struct {
-	item   string
-	action string
-}
-
 type modelList struct {
 	list        list.Model
 	takenItemID int
-	choose      choice
 	quitting    bool
 	nextPage    func(int)
 }
 
-func (m modelList) Init() tea.Cmd {
+func (m *modelList) Init() tea.Cmd {
 	return nil
 }
 
-func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
@@ -44,7 +38,7 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "enter":
-			i, ok := m.list.SelectedItem().(item.Item)
+			i, ok := m.list.SelectedItem().(iList.Item)
 			if ok {
 				if m.list.Title == mainTitle {
 					m.takenItemID = m.list.Index()*2 + 1
@@ -71,7 +65,7 @@ func (m modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m modelList) View() string {
+func (m *modelList) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("Ничего не нужно? Ну пока!")
 	}

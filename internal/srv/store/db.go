@@ -46,7 +46,7 @@ func (db *Storage) GetUser(ctx context.Context, login string) (*model.User, erro
 	return &u, nil
 }
 
-func (db *Storage) AddNewPair(ctx context.Context, userID int, pair model.PairInfo) error {
+func (db *Storage) AddPair(ctx context.Context, userID int, pair model.PairInfo) error {
 	_, err := db.ExecContext(ctx, "INSERT INTO pairs (user_id, date, login, password, meta) VALUES ($1, $2, $3, $4, $5)", userID, pair.Date, pair.Login, pair.Password, pair.Text)
 	return err
 }
@@ -81,7 +81,7 @@ func (db *Storage) GetPairs(ctx context.Context, userID int, limit int, offset i
 	return pairs, nil
 }
 
-func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader) error {
+func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *multipart.FileHeader, isBinary bool) error {
 	conn, err := db.Conn(ctx)
 	if err != nil {
 		return err
@@ -97,15 +97,17 @@ func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *
 		defer db.SetInterrupt(old)
 
 		const (
-			prefix  = "@"
-			userTag = "user_id"
-			dateTag = "date"
-			nameTag = "name"
-			sizeTag = "size"
-			fileTag = "file"
+			prefix    = "@"
+			userTag   = "user_id"
+			dateTag   = "date"
+			nameTag   = "name"
+			sizeTag   = "size"
+			binaryTag = "binary"
+			fileTag   = "file"
 		)
-		query := fmt.Sprintf(`INSERT INTO files (%s, %s, %s, %s) VALUES (%s, %s, %s, zeroblob(%s))`,
-			userTag, dateTag, nameTag, fileTag, prefix+userTag, prefix+dateTag, prefix+nameTag, prefix+sizeTag)
+		query := fmt.Sprintf(`INSERT INTO files (%s, %s, %s, %s, %s) VALUES (%s, %s, %s, zeroblob(%s), %s)`,
+			userTag, dateTag, nameTag, fileTag, binaryTag,
+			prefix+userTag, prefix+dateTag, prefix+nameTag, prefix+sizeTag, prefix+binaryTag)
 
 		stmt, _, err := db.Prepare(query)
 		if err != nil {
@@ -124,13 +126,20 @@ func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *
 		if err != nil {
 			return err
 		}
+		err = stmt.BindBool(stmt.BindIndex(prefix+binaryTag), isBinary)
+		if err != nil {
+			return err
+		}
 		err = stmt.BindInt64(stmt.BindIndex(prefix+sizeTag), fh.Size)
 		if err != nil {
 			return err
 		}
 
 		err = stmt.Exec()
-		stmt.ClearBindings()
+		if err != nil {
+			return err
+		}
+		err = stmt.ClearBindings()
 		if err != nil {
 			return err
 		}
@@ -150,7 +159,7 @@ func (db *Storage) AddFile(ctx context.Context, userID int, file io.Reader, fh *
 	})
 }
 
-func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset int) ([]model.FileInfo, error) {
+func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset int, isBinary bool) ([]model.FileInfo, error) {
 	files := []model.FileInfo{}
 	rows, err := db.QueryContext(ctx, `SELECT
 				name,
@@ -158,10 +167,11 @@ func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset i
 				date,
 				meta
 			FROM files
-			WHERE user_id = @user_id ORDER BY date DESC LIMIT @limit OFFSET @offset`,
+			WHERE user_id = @user_id and binary = @binary ORDER BY date DESC LIMIT @limit OFFSET @offset`,
 		sql.Named("user_id", userID),
 		sql.Named("limit", limit),
 		sql.Named("offset", offset),
+		sql.Named("binary", isBinary),
 	)
 	if err != nil {
 		return files, err
@@ -180,4 +190,35 @@ func (db *Storage) GetFiles(ctx context.Context, userID int, limit int, offset i
 		files = append(files, file)
 	}
 	return files, nil
+}
+
+func (db *Storage) AddCard(ctx context.Context, userID int, card model.CardInfo) error {
+	_, err := db.ExecContext(ctx, "INSERT INTO cards (user_id, ccn, exp, cvv, date, meta) VALUES ($1, $2, $3, $4, $5, $6)", userID, card.Number, card.Exp, card.VerifVal, card.Date, card.Text)
+	return err
+}
+
+func (db *Storage) GetCards(ctx context.Context, userID int, limit int, offset int) ([]model.CardInfo, error) {
+	cards := []model.CardInfo{}
+	rows, err := db.QueryContext(ctx, `SELECT ccn, exp, cvv, date, meta
+			FROM cards
+			WHERE user_id = @user_id ORDER BY date DESC LIMIT @limit OFFSET @offset`,
+		sql.Named("user_id", userID),
+		sql.Named("limit", limit),
+		sql.Named("offset", offset),
+	)
+	if err != nil {
+		return cards, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		card := model.CardInfo{}
+		err = rows.Scan(&card.Number, &card.Exp, &card.VerifVal, &card.Date, &card.Text)
+		if err != nil {
+			return cards, err
+		}
+		cards = append(cards, card)
+	}
+
+	return cards, nil
 }

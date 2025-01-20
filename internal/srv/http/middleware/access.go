@@ -3,8 +3,8 @@ package middleware
 import (
 	"context"
 	"fmt"
-	"iwakho/gopherkeep/internal/srv/jwt"
 	"iwakho/gopherkeep/internal/model"
+	"iwakho/gopherkeep/internal/srv/jwt"
 	"net/http"
 	"strings"
 )

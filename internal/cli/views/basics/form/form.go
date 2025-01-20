@@ -8,7 +8,6 @@ import (
 	btn "iwakho/gopherkeep/internal/cli/views/basics/button"
 	"iwakho/gopherkeep/internal/model"
 
-	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -22,21 +21,22 @@ var (
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 )
 
-type Control interface {
-	Submit(p model.Pair) error
-}
+type submitFunc func(model.Pair) error
 
 type ModelForm struct {
 	Name        string
 	focusIndex  int
 	inputs      []textinput.Model
-	cursorMode  cursor.Mode
 	NextPage    func()
 	buttons     []string
 	indexMax    int
 	failMessage string
 	isUpdated   bool
-	Control
+	submitCall  submitFunc
+}
+
+func (m *ModelForm) Submit(p model.Pair) error {
+	return m.submitCall(p)
 }
 
 type FormCaller struct {
@@ -45,10 +45,11 @@ type FormCaller struct {
 	ButtonNames []string
 }
 
-func InitForm(fc *FormCaller) *ModelForm {
+func InitForm(fc *FormCaller, submitCall submitFunc) *ModelForm {
 	m := ModelForm{
-		Name:   fc.FormName,
-		inputs: make([]textinput.Model, len(fc.InputNames)),
+		Name:       fc.FormName,
+		inputs:     make([]textinput.Model, len(fc.InputNames)),
+		submitCall: submitCall,
 	}
 	m.buttons = fc.ButtonNames
 	var t textinput.Model

@@ -7,41 +7,77 @@ import (
 	"os"
 )
 
-var (
-	Client     http.Client
-	ApiLogin   string
-	ApiSignUp  string
-	ApiAddItem string
-	ApiGetItem string
+const (
+	apiLogin    = "/user/login"
+	apiSignUp   = "/user/signup"
+	apiAddPair  = "/item/add/pair"
+	apiAddCard  = "/item/add/card"
+	apiAddFile  = "/item/add/file"
+	apiAddText  = "/item/add/text"
+	apiGetPairs = "/item/pairs"
+	apiGetCards = "/item/cards"
+	apiBase     = "/api/v1"
 )
 
-func InitClient(certPath string, baseURL string) error {
-	apiURL := baseURL + "/api/v1"
-	ApiLogin = apiURL + "/user/login"
-	ApiSignUp = apiURL + "/user/signup"
-	ApiAddItem = apiURL + "/item/add"
-	ApiGetItem = apiURL + "/item"
+type items struct {
+	Pair string
+	Card string
+	File string
+	Text string
+}
+
+type Api struct {
+	login  string
+	signUp string
+	Add    items
+	Get    items
+}
+
+type Client struct {
+	token   string
+	baseURL string
+	Api
+	http.Client
+}
+
+func New(certPath string, baseURL string) (*Client, error) {
+	apiURL := baseURL + apiBase
+	api := Api{
+		login:  apiURL + apiLogin,
+		signUp: apiURL + apiSignUp,
+		Add: items{
+			Pair: apiURL + apiAddPair,
+			Card: apiURL + apiAddCard,
+			File: apiURL + apiAddFile,
+			Text: apiURL + apiAddText,
+		},
+		Get: items{
+			Pair: apiURL + apiGetPairs,
+			Card: apiURL + apiGetCards,
+		},
+	}
 	if certPath == "" {
-		Client = http.Client{}
-		return nil
+		return &Client{
+			Client:  http.Client{},
+			baseURL: baseURL,
+			Api:     api,
+		}, nil
 	}
 	caCert, err := os.ReadFile(certPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
-	// Плохо понимаю нужно ли вручную грузить сертификат,
-	// т.к. Wireshark показывает TLS и данные выглядят зашифрованными.
-	// Ошибка "failed to verify certificate" возникает, если создать пустой CertPool и не грузить туда ничего.
-	// Если создать дефолтный http.Client{} без CertPool, то по дефолту какой-то сертификат видимо есть.
-
-	Client = http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs: caCertPool,
+	return &Client{
+		Client: http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					RootCAs: caCertPool,
+				},
 			},
 		},
-	}
-	return nil
+		baseURL: baseURL,
+		Api:     api,
+	}, nil
 }
