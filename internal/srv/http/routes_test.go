@@ -385,6 +385,14 @@ func Test_GetFiles(t *testing.T) {
 				code: http.StatusOK,
 			},
 		},
+		{
+			name:   "success",
+			url:    "/api/v1/item/texts?offset=0&limit=10",
+			method: http.MethodGet,
+			want: want{
+				code: http.StatusOK,
+			},
+		},
 	}
 	router, db := setup(t)
 
