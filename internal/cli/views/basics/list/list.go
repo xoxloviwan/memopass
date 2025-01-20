@@ -80,12 +80,9 @@ func (m *modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				it := item.(Item)
 				if it.ID != 0 {
 					return m, msgs.NextPageCmd(m.nextPage, msgs.LoadData{ID: it.ID})
-				} else {
-					return m, msgs.NextPageCmd(m.nextPage, nil)
 				}
 			}
-			return m, nil
-			// return m, msgs.NextPageCmd(m.nextPage, nil)
+			return m, msgs.NextPageCmd(m.nextPage, nil)
 		case "down":
 			if m.list.Paginator.OnLastPage() && m.list.Index() == len(m.list.Items())-1 && !m.allFetched {
 				items := m.list.Items()
