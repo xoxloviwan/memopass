@@ -25,6 +25,7 @@ func (f CardFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 
 	for _, v := range cards {
 		item := list.Item{
+			ID:          v.ID,
 			Title:       v.Date.Local().String(),
 			Description: fmt.Sprintf("\tНомер: %s\n\tДействует до: %s\n\tCVV: %s", v.Number, v.Exp, v.VerifVal),
 		}
@@ -37,5 +38,5 @@ func NewPage(nextPage int, ctrl Control) tea.Model {
 	return list.New(
 		"Посмотреть карты",
 		&CardFetcher{Control: ctrl},
-		nextPage)
+		nextPage, false)
 }

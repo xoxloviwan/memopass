@@ -21,13 +21,15 @@ type modelList struct {
 	allFetched bool
 	Fetcher
 	nextPage int
+	sendID   bool
 }
 
-func New(title string, f Fetcher, nextPage int) *modelList {
+func New(title string, f Fetcher, nextPage int, sendID bool) *modelList {
 	return &modelList{
 		list:     newModel(title),
 		nextPage: nextPage,
 		Fetcher:  f,
+		sendID:   sendID,
 	}
 }
 
@@ -70,7 +72,20 @@ func (m *modelList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
 		case "enter":
-			return m, msgs.NextPageCmd(m.nextPage, nil)
+			if m.sendID {
+				item := m.list.SelectedItem()
+				if item == nil {
+					return m, msgs.NextPageCmd(m.nextPage, nil)
+				}
+				it := item.(Item)
+				if it.ID != 0 {
+					return m, msgs.NextPageCmd(m.nextPage, msgs.LoadData{ID: it.ID})
+				} else {
+					return m, msgs.NextPageCmd(m.nextPage, nil)
+				}
+			}
+			return m, nil
+			// return m, msgs.NextPageCmd(m.nextPage, nil)
 		case "down":
 			if m.list.Paginator.OnLastPage() && m.list.Index() == len(m.list.Items())-1 && !m.allFetched {
 				items := m.list.Items()

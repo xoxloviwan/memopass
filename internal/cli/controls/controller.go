@@ -1,11 +1,11 @@
 package controls
 
 import (
+	"encoding/json"
 	iCrypto "iwakho/gopherkeep/internal/cli/crypto"
 	iHttp "iwakho/gopherkeep/internal/cli/http"
 	"iwakho/gopherkeep/internal/model"
 	"os"
-	"time"
 )
 
 type Controller struct {
@@ -89,57 +89,41 @@ func (c *Controller) AddText(text string) error {
 }
 
 func (c *Controller) GetTexts(limit int, offset int) ([]model.FileInfo, error) {
-	return []model.FileInfo{
-		{
-			File: model.File{
-				Name: "some file",
-				Blob: []byte("some text"),
-				ID:   1,
-			},
-			Metainfo: model.Metainfo{
-				Date: time.Now(),
-			},
-		},
-		{
-			File: model.File{
-				Name: "some file",
-				Blob: []byte("some text"),
-				ID:   3,
-			},
-			Metainfo: model.Metainfo{
-				Date: time.Now(),
-			},
-		},
-	}, nil
+	data, err := c.cli.GetItems(c.cli.Api.Get.Text, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	var files []model.FileInfo
+	err = json.Unmarshal(data, &files)
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
 }
 
 func (c *Controller) GetFiles(limit int, offset int) ([]model.FileInfo, error) {
-	return []model.FileInfo{
-		{
-			File: model.File{
-				Name: "some file",
-				ID:   1,
-			},
-			Metainfo: model.Metainfo{
-				Date: time.Now(),
-			},
-		},
-		{
-			File: model.File{
-				Name: "some file",
-				ID:   3,
-			},
-			Metainfo: model.Metainfo{
-				Date: time.Now(),
-			},
-		},
-	}, nil
+	data, err := c.cli.GetItems(c.cli.Api.Get.File, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	var files []model.FileInfo
+	err = json.Unmarshal(data, &files)
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
 }
 
-func (c *Controller) GetFileById(id int) error {
-	return nil
+func (c *Controller) GetFileById(id int) (*model.File, error) {
+	file := new(model.File)
+	var err error
+	file.Blob, file.Name, err = c.cli.GetFileById(c.cli.Api.GetById.File, id)
+	return file, err
 }
 
-func (c *Controller) GetTextById(id int) (string, error) {
-	return "some file", nil
+func (c *Controller) GetTextById(id int) (*model.File, error) {
+	file := new(model.File)
+	var err error
+	file.Blob, file.Name, err = c.cli.GetFileById(c.cli.Api.GetById.Text, id)
+	return file, err
 }

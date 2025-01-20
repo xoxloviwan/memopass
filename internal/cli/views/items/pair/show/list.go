@@ -37,5 +37,5 @@ func NewPage(nextPage int, ctrl Control) tea.Model {
 	return list.New(
 		"Посмотреть пары логин/пароль",
 		&PairFetcher{Control: ctrl},
-		nextPage)
+		nextPage, false)
 }

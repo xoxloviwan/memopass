@@ -10,7 +10,6 @@ import (
 
 type Control interface {
 	GetTexts(int, int) ([]model.FileInfo, error)
-	GetTextById(int) (string, error)
 }
 
 type TextFetcher struct {
@@ -30,6 +29,7 @@ func (f TextFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 			startText = startText[:5] + "..."
 		}
 		item := list.Item{
+			ID:          v.ID,
 			Title:       v.Date.Local().String(),
 			Description: fmt.Sprintf("\tЗаметка: %s", startText),
 		}
@@ -42,5 +42,5 @@ func NewPage(nextPage int, ctrl Control) tea.Model {
 	return list.New(
 		"Посмотреть заметки",
 		&TextFetcher{Control: ctrl},
-		nextPage)
+		nextPage, true)
 }

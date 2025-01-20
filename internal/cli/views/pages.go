@@ -50,6 +50,7 @@ type Controller interface {
 	addText.Control
 	listTexts.Control
 	listFiles.Control
+	showText.Control
 }
 
 const offset = 2
@@ -77,7 +78,7 @@ func InitPages(ctrl Controller) *Pages {
 	p.add(offset+5, listFiles.NewPage(1, ctrl))
 	p.add(offset+6, addCard.NewPage(1, ctrl))
 	p.add(offset+7, showCards.NewPage(1, ctrl))
-	p.add(offset+8, showText.NewPage(1))
+	p.add(offset+8, showText.NewPage(1, ctrl))
 
 	return &p
 }

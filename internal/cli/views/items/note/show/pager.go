@@ -5,13 +5,20 @@ package noteshow
 
 import (
 	"fmt"
-	"os"
 	"strings"
+
+	md "iwakho/gopherkeep/internal/model"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	msgs "iwakho/gopherkeep/internal/cli/messages"
 )
+
+type Control interface {
+	GetTextById(int) (*md.File, error)
+}
 
 var (
 	titleStyle = func() lipgloss.Style {
@@ -28,10 +35,12 @@ var (
 )
 
 type model struct {
+	title    string
 	content  string
 	ready    bool
 	viewport viewport.Model
 	nextPage int
+	Control
 }
 
 func (m *model) Init() tea.Cmd {
@@ -45,8 +54,20 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 
 	switch msg := msg.(type) {
+	case msgs.LoadData:
+		file, err := m.GetTextById(msg.ID)
+		if err != nil {
+			m.viewport.SetContent(err.Error())
+			return m, nil
+		}
+		m.title = file.Name
+		m.viewport.SetContent(string(file.Blob))
+		return m, nil
 	case tea.KeyMsg:
-		if k := msg.String(); k == "ctrl+c" || k == "q" || k == "esc" {
+		switch msg.String() {
+		case "enter":
+			return m, msgs.NextPageCmd(m.nextPage, nil)
+		case "q", "ctrl+c":
 			return m, tea.Quit
 		}
 
@@ -86,7 +107,7 @@ func (m *model) View() string {
 }
 
 func (m *model) headerView() string {
-	title := titleStyle.Render("Mr. Pager")
+	title := titleStyle.Render(m.title)
 	line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
@@ -104,10 +125,6 @@ func max(a, b int) int {
 	return b
 }
 
-func NewPage(nextPage int) *model {
-	content, err := os.ReadFile("Taskfile.yml")
-	if err != nil {
-		return &model{content: fmt.Sprintln("could not load file:", err), nextPage: nextPage}
-	}
-	return &model{content: string(content), nextPage: nextPage}
+func NewPage(nextPage int, ctrl Control) *model {
+	return &model{content: "Загрузка...", nextPage: nextPage, Control: ctrl}
 }

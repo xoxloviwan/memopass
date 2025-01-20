@@ -10,7 +10,7 @@ import (
 
 type Control interface {
 	GetFiles(int, int) ([]model.FileInfo, error)
-	GetFileById(int) error
+	GetFileById(int) (*model.File, error)
 }
 
 type FileFetcher struct {
@@ -38,5 +38,5 @@ func NewPage(nextPage int, ctrl Control) tea.Model {
 	return list.New(
 		"Посмотреть файлы",
 		&FileFetcher{Control: ctrl},
-		nextPage)
+		nextPage, true)
 }

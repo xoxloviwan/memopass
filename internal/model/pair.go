@@ -8,6 +8,7 @@ import (
 type Pair struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
+	ID       int    `json:"id"`
 }
 
 type PairInfo struct {

@@ -8,15 +8,19 @@ import (
 )
 
 const (
-	apiLogin    = "/user/login"
-	apiSignUp   = "/user/signup"
-	apiAddPair  = "/item/add/pair"
-	apiAddCard  = "/item/add/card"
-	apiAddFile  = "/item/add/file"
-	apiAddText  = "/item/add/text"
-	apiGetPairs = "/item/pairs"
-	apiGetCards = "/item/cards"
-	apiBase     = "/api/v1"
+	apiLogin       = "/user/login"
+	apiSignUp      = "/user/signup"
+	apiAddPair     = "/item/add/pair"
+	apiAddCard     = "/item/add/card"
+	apiAddFile     = "/item/add/file"
+	apiAddText     = "/item/add/text"
+	apiGetPairs    = "/item/pairs"
+	apiGetCards    = "/item/cards"
+	apiGetFiles    = "/item/files"
+	apiGetTexts    = "/item/texts"
+	apiGetTextByID = "/item/text"
+	apiGetFileByID = "/item/file"
+	apiBase        = "/api/v1"
 )
 
 type items struct {
@@ -27,10 +31,11 @@ type items struct {
 }
 
 type Api struct {
-	login  string
-	signUp string
-	Add    items
-	Get    items
+	login   string
+	signUp  string
+	Add     items
+	Get     items
+	GetById items
 }
 
 type Client struct {
@@ -54,6 +59,12 @@ func New(certPath string, baseURL string) (*Client, error) {
 		Get: items{
 			Pair: apiURL + apiGetPairs,
 			Card: apiURL + apiGetCards,
+			File: apiURL + apiGetFiles,
+			Text: apiURL + apiGetTexts,
+		},
+		GetById: items{
+			File: apiURL + apiGetFileByID,
+			Text: apiURL + apiGetTextByID,
 		},
 	}
 	if certPath == "" {
