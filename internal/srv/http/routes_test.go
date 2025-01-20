@@ -75,6 +75,19 @@ func Test_AddCard(t *testing.T) {
 				code: http.StatusOK,
 			},
 		},
+		{
+			name:   "bad_multipart_form",
+			url:    "/api/v1/item/add/card",
+			method: http.MethodPost,
+			pars: map[string]string{
+				"cnn": "1234 5678 9012 3456",
+				"exp": "12/25",
+				"cvv": "123",
+			},
+			want: want{
+				code: http.StatusBadRequest,
+			},
+		},
 	}
 	router, db := setup(t)
 
@@ -86,11 +99,14 @@ func Test_AddCard(t *testing.T) {
 				t.Error(err)
 			}
 			body, contentTypeHeader := multipartBody(t, tt.pars)
+			if tt.want.code == http.StatusBadRequest {
+				body = bytes.NewBufferString("blablabla")
+			}
 			req := httptest.NewRequest(tt.method, tt.url, body)
 			w := httptest.NewRecorder()
 
 			db.EXPECT().AddCard(gomock.Any(), userID, gomock.Any()).Return(tt.want.err)
-			req.Header.Set("Authorization", jwt.Bearer+tkn)
+			req.AddCookie(&http.Cookie{Name: "tkn", Value: tkn})
 			req.Header.Set("Content-Type", contentTypeHeader)
 			router.ServeHTTP(w, req)
 
@@ -241,6 +257,22 @@ func Test_GetPairs(t *testing.T) {
 				code: http.StatusOK,
 			},
 		},
+		{
+			name:   "bad_offset",
+			url:    "/api/v1/item/pairs?offset=A&limit=10",
+			method: http.MethodGet,
+			want: want{
+				code: http.StatusBadRequest,
+			},
+		},
+		{
+			name:   "bad_limit",
+			url:    "/api/v1/item/pairs?offset=0&limit=B",
+			method: http.MethodGet,
+			want: want{
+				code: http.StatusBadRequest,
+			},
+		},
 	}
 	router, db := setup(t)
 
@@ -265,11 +297,11 @@ func Test_GetPairs(t *testing.T) {
 	}
 }
 
-func Test_GetCards(t *testing.T) {
+func Test_GetFileByID(t *testing.T) {
 	tests := []testcase{
 		{
 			name:   "success",
-			url:    "/api/v1/item/cards?offset=0&limit=10",
+			url:    "/api/v1/item/file/?id=1",
 			method: http.MethodGet,
 			want: want{
 				code: http.StatusOK,
@@ -288,8 +320,52 @@ func Test_GetCards(t *testing.T) {
 			req := httptest.NewRequest(tt.method, tt.url, nil)
 			w := httptest.NewRecorder()
 
-			db.EXPECT().GetCards(gomock.Any(), userID, gomock.Any(), gomock.Any()).Return([]model.CardInfo{}, tt.want.err)
+			db.EXPECT().GetFileById(gomock.Any(), userID, gomock.Any(), gomock.Any()).Return([]byte("some text"), "test.txt", tt.want.err)
 			req.Header.Set("Authorization", jwt.Bearer+tkn)
+			router.ServeHTTP(w, req)
+
+			if w.Code != tt.want.code {
+				t.Errorf("expected %v; got %v", tt.want.code, w.Code)
+			}
+		})
+	}
+}
+
+func Test_GetCards(t *testing.T) {
+	tests := []testcase{
+		{
+			name:   "success",
+			url:    "/api/v1/item/cards?offset=0&limit=10",
+			method: http.MethodGet,
+			want: want{
+				code: http.StatusOK,
+			},
+		},
+		{
+			name:   "bad_auth",
+			url:    "/api/v1/item/cards?offset=0&limit=10",
+			method: http.MethodGet,
+			want: want{
+				code: http.StatusUnauthorized,
+			},
+		},
+	}
+	router, db := setup(t)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			userID := 1
+			tkn, err := jwt.BuildJWT("user", userID)
+			if err != nil {
+				t.Error(err)
+			}
+			req := httptest.NewRequest(tt.method, tt.url, nil)
+			w := httptest.NewRecorder()
+
+			db.EXPECT().GetCards(gomock.Any(), userID, gomock.Any(), gomock.Any()).Return([]model.CardInfo{}, tt.want.err)
+			if tt.want.code != http.StatusUnauthorized {
+				req.Header.Set("Authorization", jwt.Bearer+tkn)
+			}
 			router.ServeHTTP(w, req)
 
 			if w.Code != tt.want.code {
