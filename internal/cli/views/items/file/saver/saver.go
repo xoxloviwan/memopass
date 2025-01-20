@@ -20,7 +20,6 @@ type model struct {
 	err       string
 	Control
 	nextPage int
-	cnt      int
 }
 
 func NewPage(nextPage int, ctrl Control) *model {
@@ -37,7 +36,6 @@ func (m *model) Init() tea.Cmd {
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.cnt++
 	switch msg := msg.(type) {
 	case msgs.LoadData:
 		file, err := m.GetFileById(msg.ID)
