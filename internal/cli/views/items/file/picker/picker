@@ -4,9 +4,9 @@ run
 Выберите файл:␤
   /c/Projects/gopherkeep␤
 ␤
-> -rw-rw-rw-   213B picker␤
-  -rw-rw-rw-  2.9kB picker.go␤
-  -rw-rw-rw-   454B picker_test.go␤
+> picker␤
+  picker.go␤
+  picker_test.go␤
 ␤
 ␤
 ␤
