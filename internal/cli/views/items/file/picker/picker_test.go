@@ -17,6 +17,8 @@ func (c *MockController) AddFile(string) error {
 func NewPickerPageWrapper() *modelPicker {
 	mp := newModelPicker(func() {}, &MockController{})
 	mp.testMode = true
+	mp.filepicker.ShowPermissions = false
+	mp.filepicker.ShowSize = false
 	return mp
 }
 
