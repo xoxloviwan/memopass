@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  build:
+  coverage:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -26,6 +26,11 @@ jobs:
       with:
         version: 3.x
         repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install timezone dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tzdata
 
     - name: Test
       run: task test
