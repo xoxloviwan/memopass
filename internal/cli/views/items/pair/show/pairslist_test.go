@@ -4,6 +4,7 @@ import (
 	"iwakho/gopherkeep/internal/model"
 	"testing"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/knz/catwalk"
 )
