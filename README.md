@@ -1,4 +1,5 @@
 # Memopass (Gophkeeper)
+![coverage](https://raw.githubusercontent.com/xoxloviwan/memopass/badges/.badges/main/coverage.svg)
 
 A secure password and sensitive data management system written in Go.
 _This is my study project on Go._
