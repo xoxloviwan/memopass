@@ -27,12 +27,6 @@ jobs:
         version: 3.x
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Install timezone dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y tzdata
-        export ZONEINFO=$(go env GOROOT)/lib/time/zoneinfo.zip
-
     - name: Test
       run: task test
 

@@ -102,6 +102,10 @@ tasks:
 
   test:
     desc: Run tests
+    env:
+      ZONEINFO:
+        sh: |
+          echo "$(go env GOROOT)/lib/time/zoneinfo.zip"
     cmds:
       - go test ./...
 
