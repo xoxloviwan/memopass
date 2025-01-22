@@ -16,6 +16,10 @@ type MockController struct {
 
 func (c *MockController) GetPairs(limit int, offset int) ([]model.PairInfo, error) {
 	c.cnt++
+	loc, err := time.LoadLocation("Europe/Moscow")
+	if err != nil {
+		return nil, err
+	}
 	if offset == 2 {
 		return []model.PairInfo{
 			{
@@ -24,7 +28,7 @@ func (c *MockController) GetPairs(limit int, offset int) ([]model.PairInfo, erro
 					Password: "zzz",
 				},
 				Metainfo: model.Metainfo{
-					Date: time.Date(2020, 1, 1, 1, 0, 0, 0, time.FixedZone("MSK", 3*3600)),
+					Date: time.Date(2020, 1, 1, 1, 0, 0, 0, loc),
 				},
 			},
 			{
@@ -33,7 +37,7 @@ func (c *MockController) GetPairs(limit int, offset int) ([]model.PairInfo, erro
 					Password: "yyy",
 				},
 				Metainfo: model.Metainfo{
-					Date: time.Date(2020, 1, 1, 0, 0, 0, 0, time.FixedZone("MSK", 3*3600)),
+					Date: time.Date(2020, 1, 1, 0, 0, 0, 0, loc),
 				},
 			},
 		}, nil
@@ -48,8 +52,7 @@ func (c *MockController) GetPairs(limit int, offset int) ([]model.PairInfo, erro
 				Password: "bbb",
 			},
 			Metainfo: model.Metainfo{
-				Date: time.Date(2020, 1, 1, 3, 0, 0, 0, time.FixedZone("MSK", 3*3600)),
-				Text: "pair from yandex",
+				Date: time.Date(2020, 1, 1, 3, 0, 0, 0, loc),
 			},
 		},
 		{
@@ -58,8 +61,7 @@ func (c *MockController) GetPairs(limit int, offset int) ([]model.PairInfo, erro
 				Password: "ddddd",
 			},
 			Metainfo: model.Metainfo{
-				Date: time.Date(2020, 1, 1, 2, 0, 0, 0, time.FixedZone("MSK", 3*3600)),
-				Text: "pair from google",
+				Date: time.Date(2020, 1, 1, 2, 0, 0, 0, loc),
 			},
 		},
 	}, nil
