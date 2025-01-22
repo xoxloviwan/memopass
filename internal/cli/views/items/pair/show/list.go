@@ -33,9 +33,9 @@ func (f PairFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 	return items
 }
 
-func NewPage(nextPage func(), ctrl Control) tea.Model {
+func NewPage(nextPage int, ctrl Control) tea.Model {
 	return list.New(
 		"Посмотреть пары логин/пароль",
 		&PairFetcher{Control: ctrl},
-		nextPage)
+		nextPage, false)
 }

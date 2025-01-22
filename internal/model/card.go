@@ -10,6 +10,7 @@ type Card struct {
 	Number   string `json:"ccn"`
 	Exp      string `json:"exp"`
 	VerifVal string `json:"cvv"`
+	ID       int    `json:"id"`
 }
 
 type CardInfo struct {

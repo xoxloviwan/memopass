@@ -1,4 +1,4 @@
-package show
+package notelist
 
 import (
 	"fmt"
@@ -9,25 +9,29 @@ import (
 )
 
 type Control interface {
-	GetCards(int, int) ([]model.CardInfo, error)
+	GetTexts(int, int) ([]model.FileInfo, error)
 }
 
-type CardFetcher struct {
+type TextFetcher struct {
 	Control
 }
 
-func (f CardFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
+func (f TextFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 	items := []list.Item{}
-	cards, err := f.GetCards(itemsPerPage, offset)
+	files, err := f.GetTexts(itemsPerPage, offset)
 	if err != nil {
 		return []list.Item{{Title: "Ошибка", Description: err.Error()}}
 	}
 
-	for _, v := range cards {
+	for _, v := range files {
+		startText := string(v.Blob)
+		if len(startText) > 10 {
+			startText = startText[:5] + "..."
+		}
 		item := list.Item{
 			ID:          v.ID,
 			Title:       v.Date.Local().String(),
-			Description: fmt.Sprintf("\tНомер: %s\n\tДействует до: %s\n\tCVV: %s", v.Number, v.Exp, v.VerifVal),
+			Description: fmt.Sprintf("\tЗаметка: %s", startText),
 		}
 		items = append(items, item)
 	}
@@ -36,7 +40,7 @@ func (f CardFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 
 func NewPage(nextPage int, ctrl Control) tea.Model {
 	return list.New(
-		"Посмотреть карты",
-		&CardFetcher{Control: ctrl},
-		nextPage, false)
+		"Посмотреть заметки",
+		&TextFetcher{Control: ctrl},
+		nextPage, true)
 }

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	msgs "iwakho/gopherkeep/internal/cli/messages"
+
 	"github.com/charmbracelet/bubbles/filepicker"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -19,13 +21,13 @@ type modelPicker struct {
 	selectedFile string
 	quitting     bool
 	err          error
-	nextPage     func()
+	nextPage     int
 	is1stUpdate  bool
 	Control
 	testMode bool
 }
 
-func newModelPicker(nextPage func(), ctrl Control) *modelPicker {
+func newModelPicker(nextPage int, ctrl Control) *modelPicker {
 	fp := filepicker.New()
 	fp.ShowHidden = true
 	fp.AutoHeight = true
@@ -39,7 +41,7 @@ func newModelPicker(nextPage func(), ctrl Control) *modelPicker {
 	}
 }
 
-func NewPage(nextPage func(), ctrl Control) *modelPicker {
+func NewPage(nextPage int, ctrl Control) *modelPicker {
 	return newModelPicker(nextPage, ctrl)
 }
 
@@ -96,7 +98,7 @@ func (m *modelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.err = err
 			return m, tea.Batch(cmd, clearErrorAfter(2*time.Second))
 		}
-		m.nextPage()
+		return m, tea.Batch(cmd, msgs.NextPageCmd(m.nextPage, nil))
 	}
 
 	return m, cmd

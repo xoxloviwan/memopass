@@ -64,7 +64,7 @@ func listModel(lst BaseList) list.Model {
 	return l
 }
 
-func NewPage(nextPage func(int)) *modelList {
+func NewPage(nextPage func(int) int) *modelList {
 	l := listModel(mainItems())
 	return &modelList{list: l, nextPage: nextPage}
 }

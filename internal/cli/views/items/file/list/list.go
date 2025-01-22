@@ -9,25 +9,25 @@ import (
 )
 
 type Control interface {
-	GetCards(int, int) ([]model.CardInfo, error)
+	GetFiles(int, int) ([]model.FileInfo, error)
 }
 
-type CardFetcher struct {
+type FileFetcher struct {
 	Control
 }
 
-func (f CardFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
+func (f FileFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 	items := []list.Item{}
-	cards, err := f.GetCards(itemsPerPage, offset)
+	files, err := f.GetFiles(itemsPerPage, offset)
 	if err != nil {
 		return []list.Item{{Title: "Ошибка", Description: err.Error()}}
 	}
 
-	for _, v := range cards {
+	for _, v := range files {
 		item := list.Item{
 			ID:          v.ID,
 			Title:       v.Date.Local().String(),
-			Description: fmt.Sprintf("\tНомер: %s\n\tДействует до: %s\n\tCVV: %s", v.Number, v.Exp, v.VerifVal),
+			Description: fmt.Sprintf("\tФайл: %s", v.Name),
 		}
 		items = append(items, item)
 	}
@@ -36,7 +36,7 @@ func (f CardFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 
 func NewPage(nextPage int, ctrl Control) tea.Model {
 	return list.New(
-		"Посмотреть карты",
-		&CardFetcher{Control: ctrl},
-		nextPage, false)
+		"Посмотреть файлы",
+		&FileFetcher{Control: ctrl},
+		nextPage, true)
 }

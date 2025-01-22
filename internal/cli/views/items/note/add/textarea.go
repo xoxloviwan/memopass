@@ -1,7 +1,9 @@
-package textarea
+package noteadd
 
 import (
 	"fmt"
+
+	msgs "iwakho/gopherkeep/internal/cli/messages"
 
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
@@ -12,7 +14,7 @@ type errMsg error
 type textAreaModel struct {
 	textarea textarea.Model
 	err      error
-	nextPage func()
+	nextPage int
 	Control
 }
 
@@ -20,7 +22,7 @@ type Control interface {
 	AddText(string) error
 }
 
-func newTextareaModel(nextPage func(), ctrl Control) *textAreaModel {
+func newTextareaModel(nextPage int, ctrl Control) *textAreaModel {
 	ti := textarea.New()
 	ti.Placeholder = "Однажды это случилось ..."
 	ti.Focus()
@@ -33,7 +35,7 @@ func newTextareaModel(nextPage func(), ctrl Control) *textAreaModel {
 	}
 }
 
-func NewPage(nextPage func(), ctrl Control) *textAreaModel {
+func NewPage(nextPage int, ctrl Control) *textAreaModel {
 	return newTextareaModel(nextPage, ctrl)
 }
 
@@ -58,8 +60,7 @@ func (m *textAreaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.err = err
 				return m, nil
 			}
-			m.nextPage()
-			return m, nil
+			return m, msgs.NextPageCmd(m.nextPage, nil)
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		default:

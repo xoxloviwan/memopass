@@ -17,6 +17,6 @@ func (c *MockController) AddCard(p model.Card) error {
 
 func TestCard(t *testing.T) {
 	// Initialize the model to test.
-	m := NewPage(func() {}, &MockController{})
+	m := NewPage(0, &MockController{})
 	catwalk.RunModel(t, "card", m)
 }

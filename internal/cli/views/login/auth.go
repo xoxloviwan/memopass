@@ -54,11 +54,11 @@ type Control interface {
 	SignUp(p model.Pair) error
 }
 
-func NewPage(onEnter func(), ctrl Control) *AuthPage {
+func NewPage(nextPage int, ctrl Control) *AuthPage {
 	ap := AuthPage{
 		TabContent: []modelForm{
-			InitLogin(onEnter, ctrl),
-			InitSignUp(onEnter, ctrl),
+			InitLogin(nextPage, ctrl),
+			InitSignUp(nextPage, ctrl),
 		},
 		Tabs: make(map[int]Tab),
 	}

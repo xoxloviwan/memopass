@@ -11,7 +11,7 @@ type Control interface {
 	AddPair(model.Pair) error
 }
 
-func InitPair(nextPage func(), ctrl Control) *modelForm {
+func InitPair(nextPage int, ctrl Control) *modelForm {
 	fc := form.FormCaller{
 		FormName:    "Вход",
 		InputNames:  []string{"Логин", "Пароль"},
@@ -22,6 +22,6 @@ func InitPair(nextPage func(), ctrl Control) *modelForm {
 	return m
 }
 
-func NewPage(nextPage func(), ctrl Control) *modelForm {
+func NewPage(nextPage int, ctrl Control) *modelForm {
 	return InitPair(nextPage, ctrl)
 }
