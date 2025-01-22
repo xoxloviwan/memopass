@@ -25,7 +25,7 @@ func (f PairFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 
 	for _, v := range pairs {
 		item := list.Item{
-			Title:       v.Date.Local().String(),
+			Title:       v.Date.String(),
 			Description: fmt.Sprintf("\tЛогин: %s\n\tПароль: %s", v.Login, v.Password),
 		}
 		items = append(items, item)

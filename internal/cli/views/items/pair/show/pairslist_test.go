@@ -23,7 +23,8 @@ func (c *MockController) GetPairs(limit int, offset int) ([]model.PairInfo, erro
 		return nil, err
 	}
 	testDate := time.Date(2020, 1, 1, 3, 0, 0, 0, loc)
-	fmt.Println("GetPairs", testDate)
+	fmt.Println("GetPairs time1", testDate)
+	fmt.Println("GetPairs time2", testDate.Local().String())
 
 	if offset == 2 {
 		return []model.PairInfo{
