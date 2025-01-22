@@ -107,6 +107,7 @@ tasks:
         sh: |
           echo "$(go env GOROOT)/lib/time/zoneinfo.zip"
     cmds:
+      - zipinfo "$ZONEINFO"|grep Mos
       - go test ./...
 
   install_coverage:
