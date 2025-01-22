@@ -26,7 +26,7 @@ func (f CardFetcher) Fetch(itemsPerPage int, offset int) []list.Item {
 	for _, v := range cards {
 		item := list.Item{
 			ID:          v.ID,
-			Title:       v.Date.Local().String(),
+			Title:       v.Date.String(),
 			Description: fmt.Sprintf("\tНомер: %s\n\tДействует до: %s\n\tCVV: %s", v.Number, v.Exp, v.VerifVal),
 		}
 		items = append(items, item)
