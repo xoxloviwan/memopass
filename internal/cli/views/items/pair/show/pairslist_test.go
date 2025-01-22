@@ -1,7 +1,9 @@
 package show
 
 import (
+	"fmt"
 	"iwakho/gopherkeep/internal/model"
+	"reflect"
 	"testing"
 	"time"
 	_ "time/tzdata"
@@ -21,6 +23,10 @@ func (c *MockController) GetPairs(limit int, offset int) ([]model.PairInfo, erro
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("LoadLocation", loc, loc == nil, reflect.TypeOf(loc))
+	fmt.Println("LoadLocation time1", time.Date(2020, 1, 1, 3, 0, 0, 0, loc))
+	fmt.Println("LoadLocation time2", time.Date(2020, 1, 1, 3, 0, 0, 0, loc).In(loc))
+	fmt.Println("LoadLocation time3", time.Date(2020, 1, 1, 3, 0, 0, 0, time.UTC).In(loc))
 	if offset == 2 {
 		return []model.PairInfo{
 			{
