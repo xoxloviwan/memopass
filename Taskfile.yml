@@ -9,13 +9,13 @@ vars:
   LDFLAGS: "-X main.buildVersion={{.VERSION}} -X main.buildDate={{ now | date \"2006-01-02\" }} -X main.buildCommit={{.COMMIT}}"
 
 tasks:
-  build_cli:
+  build:cli:
     desc: Build gophkeeper cli
     cmds:
       - go build -ldflags "{{.LDFLAGS}}" ./cmd/gophkeeper/.
 #    silent: true
   
-  build_server:
+  build:server:
     desc: Build gophkeeper server
     cmds:
       - go build -ldflags "{{.LDFLAGS}}" ./cmd/server/.
@@ -26,10 +26,10 @@ tasks:
       - go mod tidy
       - task: lint
       - task: cover
-      - task: build_cli
-      - task: build_server
+      - task: build:cli
+      - task: build:server
 
-  install_mkcert:
+  install:mkcert:
     desc: Install mkcert
     cmds:
     - cmd: |
@@ -42,7 +42,7 @@ tasks:
         fi
       platforms: [windows]
 
-  make_cert:
+  make-cert:
     desc: Make cert for dev
     cmds:
       - |
@@ -54,7 +54,7 @@ tasks:
           echo "certs folder already exists."
         fi
 
-  install_sqlite:
+  install:sqlite:
     desc: Install sqlite3
     cmds:
     - cmd: |
@@ -67,7 +67,7 @@ tasks:
       platforms: [windows]
     
 
-  install_migrate:
+  install:migrate:
     desc: Install migrate
     cmds:
     - |
@@ -79,13 +79,13 @@ tasks:
         echo "migrate is already installed."
       fi
   
-  run_migrations:
+  run:migrations:
     vars:
       dbpath: ./db/memopass.db
     cmds:
       - migrate -database sqlite3://{{.dbpath}}?query -path db/migrations up
   
-  install_linter:
+  install:linter:
     desc: Install linter
     cmds:
       - |
@@ -109,7 +109,7 @@ tasks:
     cmds:
       - go test ./...
 
-  install_coverage:
+  install:coverage:
     desc: Install coverage
     cmds:
       - |
@@ -134,38 +134,38 @@ tasks:
   install:
     desc: Install all
     cmds:
-      - task: install_sqlite
-      - task: install_migrate
-      - task: install_linter
-      - task: install_coverage
-      - task: run_migrations
+      - task: install:sqlite
+      - task: install:migrate
+      - task: install:linter
+      - task: install:coverage
+      - task: run:migrations
   
-  run:
+  run:srv:
     desc: Run server
     cmds:
     - ./server
   
-  run_tls:
+  run:srv-tls:
     desc: Run server with tls
     cmds:
-      - task: install_mkcert
-      - task: make_cert
+      - task: install:mkcert
+      - task: make-cert
       - ./server -c certs/cert.pem -k certs/key.pem
   
-  run_cli:
+  run:cli:
     desc: Run cli
     cmds:
       - ./gophkeeper
 
-  run_cli_tls:
+  run:cli-tls:
     desc: Run cli with tls
     cmds:
-      - task: install_mkcert
-      - task: make_cert    
+      - task: install:mkcert
+      - task: make-cert    
       - ./gophkeeper -https -r certs/cert.pem
   
 
-  make_tests:
+  make-tests:
     desc: Make tests for views with "github.com/knz/catwalk"
     dir: '{{.USER_WORKING_DIR}}'
     cmds:

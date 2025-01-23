@@ -38,20 +38,20 @@ For troubleshouting see [taskfile.yml](./taskfile.yml) and install same for your
 
 ### Server
 ```bash
-task run
+task run:srv
 ```
 ### Client
 
 ```bash
-task run_cli
+task run:cli
 ```
 
 ## Usage (with TLS)
 
 For use with TLS certificates, you will need to generate a self-signed certificate. For Windows OS it can be done with the following command:
 ```bash
-task run_tls
-task run_cli_tls
+task run:srv-tls
+task run:cli-tls
 ```
 
 ## License
